@@ -3,150 +3,267 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scanner Absensi</title>
+<title>Scanner Absensi — SD Negeri Sukamulya</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; background: #0f172a; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 16px; gap: 10px; }
-  h2 { font-size: 16px; color: #14b8a6; margin-top: 4px; text-align: center; }
-  p.sub { font-size: 11px; color: #64748b; text-align: center; }
-  #status-bar { width: 100%; max-width: 500px; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; text-align: center; background: #1e293b; color: #94a3b8; }
-  #status-bar.ok  { background: #065f46; color: #6ee7b7; }
-  #status-bar.err { background: #7f1d1d; color: #fca5a5; }
-  #status-bar.warn { background: #78350f; color: #fde68a; }
-  .controls { width: 100%; max-width: 500px; display: flex; gap: 8px; flex-wrap: wrap; }
-  .btn { padding: 9px 16px; border: none; border-radius: 9px; font-weight: 700; cursor: pointer; font-size: 13px; color: white; flex-shrink: 0; }
-  .btn-green  { background: #0d9488; }
+  body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background: #0f172a; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 0 24px 0; gap: 0; }
+
+  /* HEADER */
+  .header { width: 100%; background: linear-gradient(135deg, #0f766e 0%, #0d9488 60%, #14b8a6 100%); padding: 18px 20px 16px; display: flex; align-items: center; gap: 14px; box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
+  .header img { width: 52px; height: 52px; object-fit: contain; border-radius: 50%; background: white; padding: 4px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .header-text { flex: 1; }
+  .header-text h1 { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; color: white; letter-spacing: 0.3px; line-height: 1.2; }
+  .header-text p { font-size: 10px; color: rgba(255,255,255,0.75); margin-top: 2px; font-weight: 500; }
+  .header-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 4px 12px; font-size: 10px; font-weight: 700; color: white; letter-spacing: 0.5px; white-space: nowrap; }
+
+  /* CONTENT WRAPPER */
+  .content { width: 100%; max-width: 500px; padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* STATUS BAR */
+  #status-bar { width: 100%; padding: 10px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; text-align: center; background: #1e293b; color: #94a3b8; border: 1px solid #334155; transition: all 0.3s; }
+  #status-bar.ok   { background: #064e3b; color: #6ee7b7; border-color: #065f46; }
+  #status-bar.err  { background: #450a0a; color: #fca5a5; border-color: #7f1d1d; }
+  #status-bar.warn { background: #451a03; color: #fde68a; border-color: #78350f; }
+
+  /* SECTION */
+  .section { background: #1e293b; border-radius: 16px; border: 1px solid #334155; overflow: hidden; }
+  .section-header { padding: 10px 14px; background: #0f172a; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 8px; }
+  .section-header i { color: #14b8a6; font-size: 13px; }
+  .section-header span { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; }
+  .section-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+  /* FORM ELEMENTS */
+  label.field-label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+  input.field, select.field { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #334155; background: #0f172a; color: white; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; outline: none; transition: border-color 0.2s; }
+  input.field:focus, select.field:focus { border-color: #14b8a6; }
+  input.field::placeholder { color: #475569; font-weight: 400; }
+  select.field option { background: #1e293b; }
+  .row-2 { display: flex; gap: 8px; }
+  .row-2 > div { flex: 1; }
+
+  /* BUTTONS */
+  .btn { padding: 10px 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; color: white; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn:active { transform: scale(0.97); }
+  .btn-teal   { background: #0d9488; }
+  .btn-teal:hover { background: #0f766e; }
   .btn-red    { background: #dc2626; }
-  .btn-slate  { background: #475569; }
-  .btn-purple { background: #7c3aed; }
+  .btn-red:hover { background: #b91c1c; }
+  .btn-slate  { background: #334155; }
+  .btn-slate:hover { background: #475569; }
   .btn-blue   { background: #2563eb; }
-  select.styled { padding: 8px 10px; border-radius: 8px; border: 2px solid #334155; background: #1e293b; color: white; font-size: 12px; font-weight: 700; outline: none; flex: 1; min-width: 120px; }
-  input.styled { padding: 8px 10px; border-radius: 8px; border: 2px solid #334155; background: #1e293b; color: white; font-size: 12px; font-weight: 700; outline: none; flex: 1; }
-  input.styled:focus { border-color: #14b8a6; }
-  #video-wrap { position: relative; width: 100%; max-width: 500px; border-radius: 14px; overflow: hidden; background: #000; min-height: 240px; display: flex; align-items: center; justify-content: center; }
-  #video-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 40px; color: #475569; text-align: center; }
-  #video-placeholder span { font-size: 48px; }
-  #video-placeholder p { font-size: 13px; line-height: 1.6; }
+  .btn-blue:hover { background: #1d4ed8; }
+  .btn-emerald { background: #059669; }
+  .btn-emerald:hover { background: #047857; }
+  .btn-full { width: 100%; }
+  .btn-sm { padding: 6px 12px; font-size: 11px; border-radius: 8px; }
+
+  /* SISWA INFO */
+  #siswa-info { font-size: 11px; color: #64748b; text-align: center; padding: 4px 0; font-weight: 600; }
+
+  /* VIDEO */
+  #video-wrap { position: relative; width: 100%; border-radius: 16px; overflow: hidden; background: #000; min-height: 240px; display: flex; align-items: center; justify-content: center; border: 1px solid #334155; }
+  #video-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 40px; color: #475569; text-align: center; }
+  #video-placeholder i { font-size: 48px; color: #334155; }
+  #video-placeholder p { font-size: 13px; line-height: 1.6; color: #475569; }
   video { width: 100%; display: block; max-height: 320px; object-fit: cover; }
   canvas { display: none; }
-  .corner { position: absolute; width: 22px; height: 22px; border-color: #14b8a6; border-style: solid; }
+
+  /* CORNERS */
+  .corner { position: absolute; width: 24px; height: 24px; border-color: #14b8a6; border-style: solid; }
   .corner.tl { top: 10px; left: 10px; border-width: 3px 0 0 3px; border-radius: 3px 0 0 0; }
   .corner.tr { top: 10px; right: 10px; border-width: 3px 3px 0 0; border-radius: 0 3px 0 0; }
   .corner.bl { bottom: 10px; left: 10px; border-width: 0 0 3px 3px; border-radius: 0 0 0 3px; }
   .corner.br { bottom: 10px; right: 10px; border-width: 0 3px 3px 0; border-radius: 0 0 3px 0; }
-  .scan-line { position: absolute; left: 8%; right: 8%; height: 2px; background: rgba(20,184,166,0.85); box-shadow: 0 0 8px rgba(20,184,166,0.7); animation: scanMove 2s ease-in-out infinite; display: none; }
+  .scan-line { position: absolute; left: 8%; right: 8%; height: 2px; background: rgba(20,184,166,0.85); box-shadow: 0 0 10px rgba(20,184,166,0.7); animation: scanMove 2s ease-in-out infinite; display: none; }
   @keyframes scanMove { 0%,100%{top:12%} 50%{top:88%} }
-  #flash { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 8px; }
-  #flash p { font-size: 16px; font-weight: 700; text-align: center; padding: 0 20px; }
+
+  /* FLASH */
+  #flash { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 8px; border-radius: 16px; }
+  #flash .flash-icon { font-size: 52px; }
+  #flash p { font-size: 16px; font-weight: 800; text-align: center; padding: 0 20px; }
+  #flash small { font-size: 12px; opacity: 0.85; }
   @keyframes flashFade { 0%{opacity:1} 60%{opacity:1} 100%{opacity:0; pointer-events:none} }
-  #manual-wrap { width: 100%; max-width: 500px; display: flex; gap: 8px; }
-  #manual-input { flex: 1; padding: 10px 14px; border-radius: 10px; border: 2px solid #334155; background: #1e293b; color: white; font-size: 14px; font-family: monospace; outline: none; }
-  #manual-input:focus { border-color: #14b8a6; }
-  #log-box { width: 100%; max-width: 500px; background: #1e293b; border-radius: 12px; overflow: hidden; }
-  .log-head { padding: 9px 14px; background: #0f766e; font-size: 12px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
-  .log-head button { background: none; border: none; color: #a7f3d0; cursor: pointer; font-size: 11px; }
-  #log-list { max-height: 180px; overflow-y: auto; }
-  .log-item { padding: 8px 14px; border-bottom: 1px solid #334155; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+
+  /* CAMERA CONTROLS */
+  .cam-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* NO SUPPORT */
+  #no-support { display: none; width: 100%; background: #451a03; border: 1px solid #c2410c; border-radius: 12px; padding: 12px 16px; font-size: 12px; line-height: 1.7; color: #fdba74; }
+
+  /* LOG */
+  .log-header { padding: 10px 14px; background: #0f766e; display: flex; justify-content: space-between; align-items: center; }
+  .log-header span { font-size: 12px; font-weight: 700; }
+  .log-header-btns { display: flex; gap: 6px; }
+  #log-list { max-height: 200px; overflow-y: auto; }
+  #log-list::-webkit-scrollbar { width: 4px; }
+  #log-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  .log-item { padding: 10px 14px; border-bottom: 1px solid #1e293b; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #0f172a; transition: background 0.2s; }
+  .log-item:hover { background: #1e293b; }
   .log-nama { font-weight: 700; color: #e2e8f0; font-size: 12px; }
-  .log-meta { color: #64748b; font-size: 10px; font-family: monospace; }
-  .badge { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+  .log-meta { color: #475569; font-size: 10px; font-family: monospace; margin-top: 2px; }
+  .badge { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; white-space: nowrap; }
   .badge-ok  { background: #0d9488; color: white; }
   .badge-err { background: #dc2626; color: white; }
-  #config-box { width: 100%; max-width: 500px; background: #1e293b; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
-  #config-box label { font-size: 11px; color: #94a3b8; font-weight: 700; }
-  #no-support { display: none; width: 100%; max-width: 500px; background: #7c2d12; border: 1px solid #c2410c; border-radius: 10px; padding: 12px 16px; font-size: 12px; line-height: 1.7; color: #fdba74; }
-  .section-title { width: 100%; max-width: 500px; font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 1px; padding-top: 4px; }
+  .badge-warn { background: #d97706; color: white; }
+
+  /* MANUAL INPUT */
+  #manual-wrap { display: flex; gap: 8px; }
+  #manual-input { flex: 1; padding: 11px 14px; border-radius: 10px; border: 1.5px solid #334155; background: #0f172a; color: white; font-size: 14px; font-family: monospace; outline: none; font-weight: 600; }
+  #manual-input:focus { border-color: #14b8a6; }
+  #manual-input::placeholder { color: #475569; font-weight: 400; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; }
+
+  /* FOOTER */
+  .footer { font-size: 10px; color: #334155; text-align: center; padding-top: 8px; font-weight: 600; }
 </style>
 </head>
 <body>
 
-<h2>📷 Scanner Absensi — Standalone</h2>
-<p class="sub">Host di GitHub Pages · Bebas dari pembatasan iframe GAS</p>
+<!-- HEADER -->
+<div class="header">
+  <img src="https://i.imgur.com/tLNoNZy.png" alt="Logo SDN Sukamulya" onerror="this.style.display='none'">
+  <div class="header-text">
+    <h1>SD NEGERI SUKAMULYA</h1>
+    <p>Kec. Parongpong · Kab. Bandung Barat</p>
+  </div>
+  <div class="header-badge"><i class="fas fa-qrcode"></i> Scanner Absensi</div>
+</div>
 
-<div id="status-bar">Siap — isi URL GAS lalu tekan Buka Kamera</div>
+<div class="content">
 
-<!-- Konfigurasi -->
-<div class="section-title">⚙️ Konfigurasi</div>
-<div id="config-box">
-  <label>URL Web App GAS (wajib diisi)</label>
-  <input class="styled" id="gas-url" type="url" placeholder="https://script.google.com/macros/s/XXXXX/exec" value="">
-  
-  <label>Tanggal Absensi</label>
-  <input class="styled" id="tgl-absensi" type="date">
+  <!-- STATUS -->
+  <div id="status-bar"><i class="fas fa-circle-notch"></i> Siap — isi konfigurasi lalu muat data siswa</div>
 
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
-    <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
-      <label>Tahun Pelajaran</label>
-      <input class="styled" id="tahun-pelajaran" type="text" placeholder="2024/2025">
+  <!-- NO SUPPORT -->
+  <div id="no-support">
+    <i class="fas fa-exclamation-triangle"></i> <strong>BarcodeDetector tidak didukung browser ini.</strong><br>
+    Gunakan <strong>Chrome / Edge versi terbaru</strong>. Sementara gunakan <strong>input manual NISN</strong> di bawah.
+  </div>
+
+  <!-- KONFIGURASI -->
+  <div class="section">
+    <div class="section-header">
+      <i class="fas fa-cog"></i>
+      <span>Konfigurasi</span>
     </div>
-    <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
-      <label>Kelas</label>
-      <input class="styled" id="kelas-input" type="text" placeholder="6A">
+    <div class="section-body">
+      <div>
+        <label class="field-label">URL Web App GAS</label>
+        <input class="field" id="gas-url" type="url" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+      <div class="row-2">
+        <div>
+          <label class="field-label">Tahun Pelajaran</label>
+          <input class="field" id="tahun-pelajaran" type="text" placeholder="2024/2025">
+        </div>
+        <div>
+          <label class="field-label">Kelas</label>
+          <input class="field" id="kelas-input" type="text" placeholder="6A">
+        </div>
+      </div>
+      <button class="btn btn-blue btn-full" onclick="loadSiswaFromGAS()">
+        <i class="fas fa-sync-alt"></i> Muat Data Siswa dari GAS
+      </button>
+      <div id="siswa-info">Belum ada data siswa dimuat</div>
+    </div>
+  </div>
+
+  <!-- KAMERA -->
+  <div class="section">
+    <div class="section-header">
+      <i class="fas fa-camera"></i>
+      <span>Kamera Scanner</span>
+    </div>
+    <div class="section-body">
+      <div class="row-2">
+        <div>
+          <label class="field-label">Tanggal Absensi</label>
+          <input class="field" id="tgl-absensi" type="date">
+        </div>
+        <div>
+          <label class="field-label">Status Default</label>
+          <select class="field" id="sel-status">
+            <option value="Hadir">✅ Hadir</option>
+            <option value="Sakit">🤒 Sakit</option>
+            <option value="Izin">📝 Izin</option>
+            <option value="Alpa">❌ Alpa</option>
+          </select>
+        </div>
+      </div>
+      <div class="cam-controls">
+        <select class="field" id="sel-facing" style="flex:1">
+          <option value="environment">📷 Kamera Belakang</option>
+          <option value="user">🤳 Kamera Depan</option>
+        </select>
+        <button class="btn btn-teal" id="btn-start" onclick="startCamera()">
+          <i class="fas fa-camera"></i> Buka Kamera
+        </button>
+        <button class="btn btn-red" id="btn-stop" onclick="stopCamera()" style="display:none">
+          <i class="fas fa-stop"></i> Stop
+        </button>
+      </div>
     </div>
   </div>
 
-  <button class="btn btn-blue" style="width:100%" onclick="loadSiswaFromGAS()">🔄 Muat Data Siswa dari GAS</button>
-  <div id="siswa-info" style="font-size:11px;color:#64748b;text-align:center;">Belum ada data siswa dimuat</div>
-</div>
-
-<!-- Kontrol Kamera -->
-<div class="section-title">📷 Kamera</div>
-<div class="controls">
-  <button class="btn btn-green" id="btn-start" onclick="startCamera()">📷 Buka Kamera</button>
-  <button class="btn btn-red"   id="btn-stop"  onclick="stopCamera()" style="display:none">⏹ Stop</button>
-  <select class="styled" id="sel-facing">
-    <option value="environment">Kamera Belakang</option>
-    <option value="user">Kamera Depan</option>
-  </select>
-  <select class="styled" id="sel-status">
-    <option value="Hadir">✅ Hadir</option>
-    <option value="Sakit">🤒 Sakit</option>
-    <option value="Izin">📝 Izin</option>
-    <option value="Alpa">❌ Alpa</option>
-  </select>
-</div>
-
-<div id="no-support">
-  ⚠️ <strong>Browser Anda tidak mendukung BarcodeDetector API.</strong><br>
-  Gunakan <strong>Chrome / Edge versi terbaru</strong> di Android atau Desktop.<br>
-  Sementara gunakan <strong>input manual NISN</strong> di bawah.
-</div>
-
-<div id="video-wrap">
-  <div id="video-placeholder">
-    <span>📷</span>
-    <p>Isi konfigurasi di atas<br>lalu tekan <strong>"Buka Kamera"</strong></p>
+  <!-- VIDEO -->
+  <div id="video-wrap">
+    <div id="video-placeholder">
+      <i class="fas fa-camera"></i>
+      <p>Isi konfigurasi & muat data siswa<br>lalu tekan <strong>"Buka Kamera"</strong><br>dan arahkan barcode kartu siswa</p>
+    </div>
+    <video id="video" autoplay muted playsinline style="display:none"></video>
+    <canvas id="canvas"></canvas>
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+    <div class="scan-line" id="scan-line"></div>
+    <div id="flash"></div>
   </div>
-  <video id="video" autoplay muted playsinline style="display:none"></video>
-  <canvas id="canvas"></canvas>
-  <div class="corner tl"></div>
-  <div class="corner tr"></div>
-  <div class="corner bl"></div>
-  <div class="corner br"></div>
-  <div class="scan-line" id="scan-line"></div>
-  <div id="flash"></div>
-</div>
 
-<!-- Input Manual -->
-<div class="section-title">⌨️ Input Manual</div>
-<div id="manual-wrap">
-  <input id="manual-input" type="text" placeholder="Ketik NISN lalu tekan Enter..." autocomplete="off" inputmode="numeric">
-  <button class="btn btn-green" onclick="doManual()">Cek</button>
-</div>
-
-<!-- Log -->
-<div id="log-box">
-  <div class="log-head">
-    <span id="log-title">Log Scan (0 siswa)</span>
-    <div style="display:flex;gap:8px;">
-      <button onclick="kirimKeGAS()" style="background:#0d9488;padding:3px 10px;border-radius:6px;color:white;border:none;cursor:pointer;font-weight:700;font-size:11px;">💾 Simpan ke GAS</button>
-      <button onclick="clearLog()">🗑 Bersihkan</button>
+  <!-- INPUT MANUAL -->
+  <div class="section">
+    <div class="section-header">
+      <i class="fas fa-keyboard"></i>
+      <span>Input Manual NISN</span>
+    </div>
+    <div class="section-body">
+      <div id="manual-wrap">
+        <input id="manual-input" type="text" placeholder="Ketik atau scan NISN lalu tekan Enter..." autocomplete="off" inputmode="numeric">
+        <button class="btn btn-teal" onclick="doManual()"><i class="fas fa-check"></i></button>
+      </div>
     </div>
   </div>
-  <div id="log-list"><div style="padding:20px;text-align:center;color:#475569;font-size:12px;">Belum ada hasil scan</div></div>
-</div>
 
-<button class="btn btn-slate" style="width:100%;max-width:500px;" onclick="window.close()">✕ Tutup</button>
+  <!-- LOG -->
+  <div class="section">
+    <div class="log-header">
+      <span><i class="fas fa-list-check" style="margin-right:6px"></i><span id="log-title">Log Scan (0 siswa)</span></span>
+      <div class="log-header-btns">
+        <button class="btn btn-emerald btn-sm" onclick="kirimKeGAS()">
+          <i class="fas fa-save"></i> Simpan ke GAS
+        </button>
+        <button class="btn btn-slate btn-sm" onclick="clearLog()">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+    <div id="log-list">
+      <div data-placeholder style="padding:20px;text-align:center;color:#475569;font-size:12px;">
+        <i class="fas fa-qrcode" style="font-size:24px;display:block;margin-bottom:8px;color:#334155"></i>
+        Belum ada hasil scan
+      </div>
+    </div>
+  </div>
+
+  <button class="btn btn-slate btn-full" onclick="window.close()">
+    <i class="fas fa-times"></i> Tutup Scanner
+  </button>
+
+  <div class="footer">SD Negeri Sukamulya · Sistem Absen Scanner</div>
+
+</div><!-- end content -->
 
 <script>
 // ===== STATE =====
@@ -160,64 +277,56 @@ var detector      = null;
 var hasBarcodeAPI = ('BarcodeDetector' in window);
 
 // ===== INIT =====
-if (!hasBarcodeAPI) {
-  document.getElementById('no-support').style.display = 'block';
-}
+if (!hasBarcodeAPI) document.getElementById('no-support').style.display = 'block';
 
-// Set tanggal default hari ini
+// Tanggal default hari ini
 var today = new Date();
-var yyyy = today.getFullYear();
-var mm = String(today.getMonth()+1).padStart(2,'0');
-var dd = String(today.getDate()).padStart(2,'0');
-document.getElementById('tgl-absensi').value = yyyy+'-'+mm+'-'+dd;
+document.getElementById('tgl-absensi').value = today.toISOString().split('T')[0];
 
-// Baca config dari URL parameter (opsional)
+// Baca config dari URL parameter
+var DEFAULT_GAS_URL = 'https://script.google.com/macros/s/AKfycbzoS5aMEajuyMu4mudbMghSCMoHBUMSSwVxK_LEPsmLncBJjK_IP8vFW5808YcwNKZ5/exec';
+document.getElementById('gas-url').value = DEFAULT_GAS_URL;
+
 var urlParams = new URLSearchParams(window.location.search);
 if (urlParams.get('gas_url')) document.getElementById('gas-url').value = decodeURIComponent(urlParams.get('gas_url'));
 if (urlParams.get('kelas'))   document.getElementById('kelas-input').value = urlParams.get('kelas');
 if (urlParams.get('tahun'))   document.getElementById('tahun-pelajaran').value = decodeURIComponent(urlParams.get('tahun'));
 
-// Coba load siswa dari localStorage (cache sebelumnya)
+// Load cache
 try {
+  var cfg = JSON.parse(localStorage.getItem('scanner_config') || '{}');
+  if (cfg.gasUrl && !document.getElementById('gas-url').value) document.getElementById('gas-url').value = cfg.gasUrl;
+  if (cfg.kelas  && !document.getElementById('kelas-input').value) document.getElementById('kelas-input').value = cfg.kelas;
+  if (cfg.tahun  && !document.getElementById('tahun-pelajaran').value) document.getElementById('tahun-pelajaran').value = cfg.tahun;
+
   var cached = localStorage.getItem('scanner_students_cache');
   if (cached) {
     students = JSON.parse(cached);
-    document.getElementById('siswa-info').textContent = '📦 Cache: ' + students.length + ' siswa (klik Muat ulang untuk refresh)';
-    document.getElementById('siswa-info').style.color = '#6ee7b7';
+    setSiswaInfo('📦 Cache: ' + students.length + ' siswa (klik Muat Ulang untuk refresh)', '#6ee7b7');
   }
 } catch(e) {}
 
-// ===== LOAD DATA SISWA DARI GAS =====
-async function loadSiswaFromGAS() {
+// ===== LOAD DATA SISWA =====
+function loadSiswaFromGAS() {
   var gasUrl = document.getElementById('gas-url').value.trim();
   var kelas  = document.getElementById('kelas-input').value.trim();
   var tahun  = document.getElementById('tahun-pelajaran').value.trim();
-
   if (!gasUrl) { alert('Isi URL GAS terlebih dahulu!'); return; }
 
-  setStatus('⏳ Memuat data siswa...', 'warn');
-  document.getElementById('siswa-info').textContent = 'Memuat...';
-
-  // Simpan config ke localStorage
   localStorage.setItem('scanner_config', JSON.stringify({ gasUrl: gasUrl, kelas: kelas, tahun: tahun }));
+  setStatus('⏳ Memuat data siswa...', 'warn');
+  setSiswaInfo('Memuat data...', '#fde68a');
 
-  // Hapus script JSONP lama
   var oldScript = document.getElementById('gas-jsonp');
   if (oldScript) oldScript.remove();
 
-  // Set timeout
-  var timeout = setTimeout(function() {
-    setStatus('⏱ Timeout 15 detik — cek URL GAS dan pastikan sudah di-deploy ulang', 'err');
-    document.getElementById('siswa-info').textContent = 'Timeout. Deploy ulang GAS lalu coba lagi.';
-    document.getElementById('siswa-info').style.color = '#fca5a5';
+  window._loadTimeout = setTimeout(function() {
+    setStatus('⏱ Timeout — pastikan GAS sudah di-deploy ulang', 'err');
+    setSiswaInfo('Timeout. Deploy ulang GAS lalu coba lagi.', '#fca5a5');
   }, 15000);
 
-  // Simpan timeout id agar bisa dibatalkan di callback
-  window._loadTimeout = timeout;
-
-  var url = gasUrl 
-    + '?action=getSiswaScanner'
-    + '&callback=onSiswaLoaded'
+  var url = gasUrl
+    + '?action=getSiswaScanner&callback=onSiswaLoaded'
     + (kelas ? '&kelas=' + encodeURIComponent(kelas) : '')
     + (tahun ? '&tahun=' + encodeURIComponent(tahun) : '');
 
@@ -227,49 +336,41 @@ async function loadSiswaFromGAS() {
   script.onerror = function() {
     clearTimeout(window._loadTimeout);
     setStatus('❌ Script gagal dimuat — cek URL GAS', 'err');
-    document.getElementById('siswa-info').textContent = 'Gagal. Cek URL GAS.';
-    document.getElementById('siswa-info').style.color = '#fca5a5';
+    setSiswaInfo('Gagal. Cek URL GAS.', '#fca5a5');
   };
   document.body.appendChild(script);
 }
 
-// Callback dari JSONP
 function onSiswaLoaded(data) {
   clearTimeout(window._loadTimeout);
   if (data && data.success && data.students) {
     students = data.students;
     localStorage.setItem('scanner_students_cache', JSON.stringify(students));
     setStatus('✅ ' + students.length + ' siswa berhasil dimuat', 'ok');
-    document.getElementById('siswa-info').textContent = '✅ ' + students.length + ' siswa siap di-scan';
-    document.getElementById('siswa-info').style.color = '#6ee7b7';
+    setSiswaInfo('✅ ' + students.length + ' siswa siap di-scan', '#6ee7b7');
   } else {
     setStatus('❌ Gagal: ' + (data ? data.message : 'Tidak ada respons'), 'err');
-    document.getElementById('siswa-info').textContent = 'Gagal. Respons tidak valid.';
-    document.getElementById('siswa-info').style.color = '#fca5a5';
+    setSiswaInfo('Gagal memuat data siswa.', '#fca5a5');
   }
 }
 
 // ===== KAMERA =====
 async function startCamera() {
   if (mediaStream) { mediaStream.getTracks().forEach(function(t){ t.stop(); }); mediaStream = null; }
-
   var facing = document.getElementById('sel-facing').value;
   var constraints = [
     { video: { facingMode: { ideal: facing }, width: { ideal: 1280 } } },
     { video: { facingMode: facing } },
     { video: true }
   ];
-
   var opened = false;
   for (var i = 0; i < constraints.length; i++) {
     try {
       mediaStream = await navigator.mediaDevices.getUserMedia(constraints[i]);
-      opened = true;
-      break;
+      opened = true; break;
     } catch(e) {
       if (i === constraints.length - 1) {
-        setStatus('❌ Kamera gagal: ' + e.name + ' — ' + e.message, 'err');
-        return;
+        setStatus('❌ Kamera gagal: ' + e.name + ' — ' + e.message, 'err'); return;
       }
     }
   }
@@ -324,7 +425,7 @@ function scanLoop() {
     .catch(function() { rafId = requestAnimationFrame(scanLoop); });
 }
 
-// ===== PROSES HASIL SCAN =====
+// ===== PROSES SCAN =====
 function processResult(raw) {
   if (!raw || onCooldown) return;
   var nisn = String(raw).replace(/\D/g,'').padStart(10,'0');
@@ -335,26 +436,26 @@ function processResult(raw) {
   onCooldown = true;
   setTimeout(function(){ onCooldown = false; }, 2000);
 
-  var student = null;
-  if (students.length > 0) {
-    student = students.find(function(s){
-      return String(s.NISN).replace(/\D/g,'').padStart(10,'0') === nisn;
-    });
+  var student = students.find(function(s){
+    return String(s.NISN).replace(/\D/g,'').padStart(10,'0') === nisn;
+  });
+
+  var nama  = student ? student.Nama  : '(Tidak ditemukan)';
+  var kelas = student ? student.Kelas : '-';
+  var tahun = student ? student.Tahun_Pelajaran : document.getElementById('tahun-pelajaran').value;
+  var isErr = !student;
+
+  if (!student) {
+    showFlash(false, '❌ NISN tidak ada di daftar', nisn);
+  } else {
+    scanned[nisn] = true;
+    showFlash(true, '✅ ' + nama, kelas);
   }
 
-  var nama   = student ? student.Nama  : '(NISN: ' + nisn + ')';
-  var kelas  = student ? student.Kelas : '-';
-  var tahun  = student ? student.Tahun_Pelajaran : document.getElementById('tahun-pelajaran').value;
-  var isErr  = !student;
-
-  if (!student) { showFlash(false, '⚠️ NISN tidak ada di daftar', nisn); }
-  else          { scanned[nisn] = true; showFlash(true, '✅ ' + nama, kelas); }
-
   var status = document.getElementById('sel-status').value;
-  var waktu  = new Date().toLocaleTimeString('id-ID');
-  var entry  = { NISN: nisn, Nama: nama, Kelas: kelas, Tahun_Pelajaran: tahun, Status: status, waktu: waktu };
+  var entry  = { NISN: nisn, Nama: nama, Kelas: kelas, Tahun_Pelajaran: tahun, Status: status, waktu: new Date().toLocaleTimeString('id-ID') };
   scanLog.push(entry);
-  addLog(nisn, nama, status, isErr);
+  addLog(entry, isErr);
 }
 
 function doManual() {
@@ -363,22 +464,19 @@ function doManual() {
 }
 document.getElementById('manual-input').addEventListener('keyup', function(e){ if(e.key==='Enter') doManual(); });
 
-// ===== KIRIM LOG KE GAS =====
+// ===== KIRIM KE GAS =====
 async function kirimKeGAS() {
   if (scanLog.length === 0) { alert('Belum ada data scan!'); return; }
-
   var gasUrl = document.getElementById('gas-url').value.trim();
   var tgl    = document.getElementById('tgl-absensi').value;
   if (!gasUrl) { alert('Isi URL GAS terlebih dahulu!'); return; }
   if (!tgl)    { alert('Isi tanggal absensi!'); return; }
 
-  // Tambahkan tanggal ke setiap entry
   var payload = scanLog.map(function(e) {
     return { NISN: e.NISN, Nama: e.Nama, Kelas: e.Kelas, Tahun_Pelajaran: e.Tahun_Pelajaran, Tanggal: tgl, Status: e.Status };
   });
 
   setStatus('⏳ Mengirim ' + payload.length + ' data ke GAS...', 'warn');
-
   try {
     var res = await fetch(gasUrl, {
       method: 'POST',
@@ -388,64 +486,66 @@ async function kirimKeGAS() {
     var json = await res.json();
     if (json && json.success) {
       setStatus('✅ ' + payload.length + ' data absensi tersimpan!', 'ok');
-      alert('✅ Berhasil! ' + payload.length + ' data absensi tersimpan ke GAS.');
+      alert('✅ Berhasil! ' + payload.length + ' data tersimpan ke GAS.');
       clearLog();
     } else {
-      setStatus('❌ Gagal simpan: ' + (json ? json.message : 'Error'), 'err');
+      setStatus('❌ Gagal: ' + (json ? json.message : 'Error'), 'err');
       alert('❌ Gagal: ' + (json ? json.message : 'Tidak ada respons'));
     }
   } catch(e) {
-    // GAS tidak support CORS untuk POST biasa, gunakan no-cors
-    // Fallback: buka GAS URL dengan data di parameter
     setStatus('⚠️ Mencoba metode alternatif...', 'warn');
-    
-    var dataStr = encodeURIComponent(JSON.stringify(payload));
-    var tglStr  = encodeURIComponent(tgl);
-    var fallbackUrl = gasUrl + '?action=saveAbsensiScanner&tgl=' + tglStr + '&data=' + dataStr;
-    
-    // Buka di tab baru sebagai fallback
+    var dataStr    = encodeURIComponent(JSON.stringify(payload));
+    var fallbackUrl = gasUrl + '?action=saveAbsensiScanner&tgl=' + encodeURIComponent(tgl) + '&data=' + dataStr;
     var win = window.open(fallbackUrl, '_blank');
-    if (win) {
-      setStatus('📤 Data dikirim via tab baru — tutup tab itu setelah selesai', 'warn');
-    } else {
-      alert('❌ Popup diblokir. Salin log manual atau izinkan popup.');
-    }
+    if (win) setStatus('📤 Data dikirim via tab baru — tutup tab itu setelah selesai', 'warn');
+    else alert('❌ Popup diblokir. Izinkan popup lalu coba lagi.');
   }
 }
 
 // ===== UI HELPERS =====
 function setStatus(msg, cls) {
   var el = document.getElementById('status-bar');
+  el.innerHTML = msg;
+  el.className = cls || '';
+}
+
+function setSiswaInfo(msg, color) {
+  var el = document.getElementById('siswa-info');
   el.textContent = msg;
-  el.className   = cls || '';
+  el.style.color = color || '#64748b';
 }
 
 function showFlash(ok, msg, sub) {
   var el = document.getElementById('flash');
-  el.style.background = ok ? 'rgba(16,185,129,0.85)' : 'rgba(239,68,68,0.85)';
-  el.innerHTML = '<p style="font-size:18px">' + msg + '</p>' + (sub ? '<p style="font-size:12px;opacity:0.85">' + sub + '</p>' : '');
+  el.style.background = ok ? 'rgba(5,150,105,0.9)' : 'rgba(220,38,38,0.9)';
+  el.innerHTML = '<div class="flash-icon">' + (ok ? '✅' : '❌') + '</div>'
+    + '<p>' + msg + '</p>'
+    + (sub ? '<small>' + sub + '</small>' : '');
   el.style.display = 'flex';
   el.style.animation = 'none';
   void el.offsetWidth;
-  el.style.animation = 'flashFade 1.2s forwards';
-  setTimeout(function(){ el.style.display = 'none'; }, 1200);
+  el.style.animation = 'flashFade 1.3s forwards';
+  setTimeout(function(){ el.style.display = 'none'; }, 1300);
 }
 
-function addLog(nisn, nama, status, isErr) {
+function addLog(entry, isErr) {
   var list = document.getElementById('log-list');
   if (list.querySelector('[data-placeholder]')) list.innerHTML = '';
+  var badgeClass = isErr ? 'badge-err' : 'badge-ok';
   var item = document.createElement('div');
   item.className = 'log-item';
-  item.innerHTML = '<div><div class="log-nama">' + nama + '</div>'
-    + '<div class="log-meta">' + nisn + ' · ' + new Date().toLocaleTimeString('id-ID') + '</div></div>'
-    + '<span class="badge ' + (isErr ? 'badge-err' : 'badge-ok') + '">' + status + '</span>';
+  item.innerHTML = '<div>'
+    + '<div class="log-nama">' + entry.Nama + '</div>'
+    + '<div class="log-meta">' + entry.NISN + ' · ' + entry.Kelas + ' · ' + entry.waktu + '</div>'
+    + '</div>'
+    + '<span class="badge ' + badgeClass + '">' + entry.Status + '</span>';
   list.insertBefore(item, list.firstChild);
   document.getElementById('log-title').textContent = 'Log Scan (' + scanLog.length + ' siswa)';
 }
 
 function clearLog() {
   scanLog = []; scanned = {};
-  document.getElementById('log-list').innerHTML = '<div data-placeholder style="padding:20px;text-align:center;color:#475569;font-size:12px;">Belum ada hasil scan</div>';
+  document.getElementById('log-list').innerHTML = '<div data-placeholder style="padding:20px;text-align:center;color:#475569;font-size:12px;"><i class="fas fa-qrcode" style="font-size:24px;display:block;margin-bottom:8px;color:#334155"></i>Belum ada hasil scan</div>';
   document.getElementById('log-title').textContent = 'Log Scan (0 siswa)';
 }
 </script>
