@@ -189,53 +189,53 @@ try {
 
 // ===== LOAD DATA SISWA DARI GAS =====
 async function loadSiswaFromGAS() {
-  var gasUrl   = document.getElementById('gas-url').value.trim();
-  var kelas    = document.getElementById('kelas-input').value.trim();
-  var tahun    = document.getElementById('tahun-pelajaran').value.trim();
+  var gasUrl = document.getElementById('gas-url').value.trim();
+  var kelas  = document.getElementById('kelas-input').value.trim();
+  var tahun  = document.getElementById('tahun-pelajaran').value.trim();
 
   if (!gasUrl) { alert('Isi URL GAS terlebih dahulu!'); return; }
 
-  setStatus('⏳ Memuat data siswa dari GAS...', 'warn');
+  setStatus('⏳ Memuat data siswa...', 'warn');
   document.getElementById('siswa-info').textContent = 'Memuat...';
 
-  // GAS tidak support CORS POST langsung, kita gunakan endpoint GET dengan parameter
-  // Kita perlu tambahkan endpoint khusus di GAS untuk ini
-  // Untuk sekarang, gunakan jsonp trick via script tag
-  try {
-    var url = gasUrl + (gasUrl.includes('?') ? '&' : '?') 
-            + 'action=getSiswaScanner'
-            + (kelas ? '&kelas=' + encodeURIComponent(kelas) : '')
-            + (tahun ? '&tahun=' + encodeURIComponent(tahun) : '')
-            + '&callback=onSiswaLoaded';
+  // Simpan config ke localStorage
+  localStorage.setItem('scanner_config', JSON.stringify({ gasUrl: gasUrl, kelas: kelas, tahun: tahun }));
 
-    // Hapus script lama kalau ada
-    var oldScript = document.getElementById('gas-jsonp');
-    if (oldScript) oldScript.remove();
+  // Hapus script JSONP lama
+  var oldScript = document.getElementById('gas-jsonp');
+  if (oldScript) oldScript.remove();
 
-    var script = document.createElement('script');
-    script.id  = 'gas-jsonp';
-    script.src = url;
-    script.onerror = function() {
-      setStatus('❌ Gagal memuat — cek URL GAS dan koneksi internet', 'err');
-      document.getElementById('siswa-info').textContent = 'Gagal memuat data';
-    };
-    document.body.appendChild(script);
+  // Set timeout
+  var timeout = setTimeout(function() {
+    setStatus('⏱ Timeout 15 detik — cek URL GAS dan pastikan sudah di-deploy ulang', 'err');
+    document.getElementById('siswa-info').textContent = 'Timeout. Deploy ulang GAS lalu coba lagi.';
+    document.getElementById('siswa-info').style.color = '#fca5a5';
+  }, 15000);
 
-    // Timeout 15 detik
-    setTimeout(function() {
-      if (students.length === 0) {
-        setStatus('⏱ Timeout — cek URL GAS', 'err');
-        document.getElementById('siswa-info').textContent = 'Timeout. Cek URL GAS.';
-      }
-    }, 15000);
+  // Simpan timeout id agar bisa dibatalkan di callback
+  window._loadTimeout = timeout;
 
-  } catch(e) {
-    setStatus('❌ Error: ' + e.message, 'err');
-  }
+  var url = gasUrl 
+    + '?action=getSiswaScanner'
+    + '&callback=onSiswaLoaded'
+    + (kelas ? '&kelas=' + encodeURIComponent(kelas) : '')
+    + (tahun ? '&tahun=' + encodeURIComponent(tahun) : '');
+
+  var script = document.createElement('script');
+  script.id  = 'gas-jsonp';
+  script.src = url;
+  script.onerror = function() {
+    clearTimeout(window._loadTimeout);
+    setStatus('❌ Script gagal dimuat — cek URL GAS', 'err');
+    document.getElementById('siswa-info').textContent = 'Gagal. Cek URL GAS.';
+    document.getElementById('siswa-info').style.color = '#fca5a5';
+  };
+  document.body.appendChild(script);
 }
 
 // Callback dari JSONP
 function onSiswaLoaded(data) {
+  clearTimeout(window._loadTimeout);
   if (data && data.success && data.students) {
     students = data.students;
     localStorage.setItem('scanner_students_cache', JSON.stringify(students));
@@ -244,7 +244,7 @@ function onSiswaLoaded(data) {
     document.getElementById('siswa-info').style.color = '#6ee7b7';
   } else {
     setStatus('❌ Gagal: ' + (data ? data.message : 'Tidak ada respons'), 'err');
-    document.getElementById('siswa-info').textContent = 'Gagal memuat data';
+    document.getElementById('siswa-info').textContent = 'Gagal. Respons tidak valid.';
     document.getElementById('siswa-info').style.color = '#fca5a5';
   }
 }
