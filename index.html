@@ -4,130 +4,245 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Scanner Absensi — SD Negeri Sukamulya</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background: #0f172a; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 0 24px 0; gap: 0; }
+  :root{
+    --bg:#f5f7fa;
+    --surface:#ffffff;
+    --surface-2:#f1f4f9;
+    --surface-soft:#eaeef5;
+    --border:#e1e6ee;
+    --border-soft:#d3dae5;
+    --text:#1c2333;
+    --text-dim:#5b6678;
+    --text-mute:#8993a6;
+    --accent:#0d9488;
+    --accent-dark:#0f766e;
+    --accent-soft:rgba(13,148,136,.10);
+    --blue:#2563eb;
+    --blue-dark:#1d4ed8;
+    --success:#059669;
+    --success-dark:#047857;
+    --danger:#dc2626;
+    --danger-dark:#b91c1c;
+    --warn:#d97706;
+    --warn-dark:#b45309;
+    --r-lg:18px;
+    --r-md:13px;
+    --r-sm:9px;
+    --font-d:'Space Grotesk',sans-serif;
+    --font-b:'Plus Jakarta Sans',Arial,sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scrollbar-color: var(--border-soft) transparent;}
+  body{
+    font-family:var(--font-b);
+    background:
+      radial-gradient(circle at 14% -8%, rgba(13,148,136,.07), transparent 45%),
+      radial-gradient(circle at 100% 0%, rgba(37,99,235,.05), transparent 40%),
+      var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::-webkit-scrollbar{width:5px; height:5px;}
+  ::-webkit-scrollbar-thumb{background:var(--border-soft); border-radius:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::placeholder{color:var(--text-mute); font-weight:400;}
 
   /* HEADER */
-  .header { width: 100%; background: linear-gradient(135deg, #0f766e 0%, #0d9488 60%, #14b8a6 100%); padding: 18px 20px 16px; display: flex; align-items: center; gap: 14px; box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
-  .header img { width: 52px; height: 52px; object-fit: contain; border-radius: 50%; background: white; padding: 4px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-  .header-text { flex: 1; }
-  .header-text h1 { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; color: white; letter-spacing: 0.3px; line-height: 1.2; }
-  .header-text p { font-size: 10px; color: rgba(255,255,255,0.75); margin-top: 2px; font-weight: 500; }
-  .header-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 4px 12px; font-size: 10px; font-weight: 700; color: white; letter-spacing: 0.5px; white-space: nowrap; }
+  .header{
+    position:sticky; top:0; z-index:60;
+    background:rgba(255,255,255,.86);
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+    padding:14px 20px;
+  }
+  .header::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--accent), var(--blue));
+  }
+  .header-inner{
+    max-width:1180px; margin:0 auto;
+    display:flex; align-items:center; gap:14px;
+  }
+  .header img{width:42px; height:42px; object-fit:contain; border-radius:50%; background:#fff; padding:3px; flex-shrink:0; border:1px solid var(--border); box-shadow:0 2px 8px rgba(15,23,42,.10);}
+  .header-text{flex:1; min-width:0;}
+  .header-text h1{font-family:var(--font-d); font-size:14.5px; font-weight:700; letter-spacing:.3px; line-height:1.25; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .header-text p{font-size:10.5px; color:var(--text-dim); margin-top:2px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .header-badge{
+    flex-shrink:0; display:flex; align-items:center; gap:7px;
+    background:var(--surface-soft); border:1px solid var(--border-soft);
+    border-radius:30px; padding:6px 13px 6px 10px; font-size:10.5px; font-weight:700; color:var(--text-dim); letter-spacing:.3px; white-space:nowrap;
+  }
+  .live-dot{width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 0 rgba(45,212,191,.6); animation:pulseDot 2s infinite;}
+  @keyframes pulseDot{
+    0%{box-shadow:0 0 0 0 rgba(45,212,191,.55);}
+    70%{box-shadow:0 0 0 7px rgba(45,212,191,0);}
+    100%{box-shadow:0 0 0 0 rgba(45,212,191,0);}
+  }
 
-  /* CONTENT WRAPPER */
-  .content { width: 100%; max-width: 500px; padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; }
+  /* CONTENT */
+  .content{max-width:1180px; margin:0 auto; width:100%; padding:18px 18px 30px; display:flex; flex-direction:column; gap:16px;}
 
   /* STATUS BAR */
-  #status-bar { width: 100%; padding: 10px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; text-align: center; background: #1e293b; color: #94a3b8; border: 1px solid #334155; transition: all 0.3s; }
-  #status-bar.ok   { background: #064e3b; color: #6ee7b7; border-color: #065f46; }
-  #status-bar.err  { background: #450a0a; color: #fca5a5; border-color: #7f1d1d; }
-  #status-bar.warn { background: #451a03; color: #fde68a; border-color: #78350f; }
+  #status-bar{
+    width:100%; padding:11px 16px; border-radius:var(--r-md); font-size:12.5px; font-weight:700;
+    display:flex; align-items:center; gap:8px;
+    background:var(--surface); color:var(--text-dim); border:1px solid var(--border);
+  }
+  #status-bar.ok  {background:#ecfdf5; color:#047857; border-color:#a7f3d0;}
+  #status-bar.err {background:#fef2f2; color:#b91c1c; border-color:#fecaca;}
+  #status-bar.warn{background:#fffbeb; color:#b45309; border-color:#fde68a;}
 
-  /* SECTION */
-  .section { background: #1e293b; border-radius: 16px; border: 1px solid #334155; overflow: hidden; }
-  .section-header { padding: 10px 14px; background: #0f172a; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 8px; }
-  .section-header i { color: #14b8a6; font-size: 13px; }
-  .section-header span { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; }
-  .section-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  /* STAT CHIPS */
+  .stats-row{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+  .stat-chip{background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md); padding:11px 14px; display:flex; flex-direction:column; gap:1px;}
+  .stat-num{font-family:var(--font-d); font-size:19px; font-weight:700; color:var(--text); line-height:1.1;}
+  .stat-label{font-size:9.5px; color:var(--text-mute); font-weight:700; text-transform:uppercase; letter-spacing:.6px;}
+  .stat-chip-ok .stat-num{color:var(--success-dark);}
+  .stat-chip-warn .stat-num{color:var(--warn-dark);}
+
+  /* GRID LAYOUT — 2 KOLOM */
+  .grid-main{display:grid; grid-template-columns:1.25fr 1fr; gap:18px; align-items:start;}
+  .col-left{display:flex; flex-direction:column; gap:14px; min-width:0;}
+  .col-right{display:flex; flex-direction:column; gap:14px; min-width:0;}
+
+  @media (min-width:961px){
+    .col-right{position:sticky; top:88px; max-height:calc(100vh - 108px);}
+    .col-right .log-section{flex:1; display:flex; flex-direction:column; min-height:0;}
+    .col-right .log-list{flex:1; min-height:120px;}
+  }
+  @media (max-width:960px){
+    .grid-main{grid-template-columns:1fr;}
+    .col-right .log-list{max-height:320px;}
+  }
+
+  /* SECTION CARD */
+  .section{background:var(--surface); border-radius:var(--r-lg); border:1px solid var(--border); overflow:hidden; box-shadow:0 10px 24px -18px rgba(15,23,42,.14);}
+  .section-header{padding:12px 16px; background:var(--surface-2); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .section-header-left{display:flex; align-items:center; gap:10px; min-width:0;}
+  .section-header-left .ico{width:28px; height:28px; border-radius:9px; background:var(--accent-soft); color:var(--accent); display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;}
+  .section-header-left span{font-size:11px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:.7px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .section-body{padding:16px; display:flex; flex-direction:column; gap:11px;}
 
   /* FORM ELEMENTS */
-  label.field-label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
-  input.field, select.field { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #334155; background: #0f172a; color: white; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; outline: none; transition: border-color 0.2s; }
-  input.field:focus, select.field:focus { border-color: #14b8a6; }
-  input.field::placeholder { color: #475569; font-weight: 400; }
-  select.field option { background: #1e293b; }
-  .row-2 { display: flex; gap: 8px; }
-  .row-2 > div { flex: 1; }
+  label.field-label{font-size:9.5px; font-weight:700; color:var(--text-mute); text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:5px;}
+  input.field, select.field{
+    width:100%; padding:10px 12px; border-radius:var(--r-sm); border:1.5px solid var(--border-soft);
+    background:var(--surface-2); color:var(--text); font-size:13px; font-family:var(--font-b); font-weight:600;
+    outline:none; transition:border-color .15s, box-shadow .15s;
+  }
+  input.field:focus, select.field:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);}
+  select.field option{background:var(--surface);}
+  .row-2{display:flex; gap:8px;}
+  .row-2 > div{flex:1; min-width:0;}
 
   /* BUTTONS */
-  .btn { padding: 10px 16px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 13px; font-family: 'Plus Jakarta Sans', sans-serif; color: white; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-  .btn:active { transform: scale(0.97); }
-  .btn-teal   { background: #0d9488; }
-  .btn-teal:hover { background: #0f766e; }
-  .btn-red    { background: #dc2626; }
-  .btn-red:hover { background: #b91c1c; }
-  .btn-slate  { background: #334155; }
-  .btn-slate:hover { background: #475569; }
-  .btn-blue   { background: #2563eb; }
-  .btn-blue:hover { background: #1d4ed8; }
-  .btn-emerald { background: #059669; }
-  .btn-emerald:hover { background: #047857; }
-  .btn-full { width: 100%; }
-  .btn-sm { padding: 6px 12px; font-size: 11px; border-radius: 8px; }
+  .btn{padding:10px 16px; border:none; border-radius:var(--r-sm); font-weight:700; cursor:pointer; font-size:12.5px; font-family:var(--font-b); color:#fff; transition:filter .15s, transform .1s; display:flex; align-items:center; justify-content:center; gap:6px; white-space:nowrap;}
+  .btn:active{transform:scale(.97);}
+  .btn:hover{filter:brightness(1.1);}
+  .btn-teal{background:linear-gradient(135deg, var(--accent-dark), var(--accent)); color:#fff;}
+  .btn-red{background:var(--danger-dark);}
+  .btn-slate{background:var(--surface-soft); border:1px solid var(--border-soft); color:var(--text-dim);}
+  .btn-slate:hover{background:#dde3ed;}
+  .btn-blue{background:linear-gradient(135deg, var(--blue-dark), var(--blue)); color:#fff;}
+  .btn-emerald{background:linear-gradient(135deg, var(--success-dark), var(--success)); color:#fff;}
+  .btn-full{width:100%;}
+  .btn-sm{padding:7px 12px; font-size:11px; border-radius:8px;}
+
+  .icon-btn{width:32px; height:32px; border-radius:9px; border:1px solid var(--border-soft); background:var(--surface-soft); color:var(--text-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:.15s; flex-shrink:0;}
+  .icon-btn:hover{background:var(--danger-dark); color:#fff; border-color:var(--danger-dark);}
 
   /* SISWA INFO */
-  #siswa-info { font-size: 11px; color: #64748b; text-align: center; padding: 4px 0; font-weight: 600; }
-
-  /* VIDEO */
-  #video-wrap { position: relative; width: 100%; border-radius: 16px; overflow: hidden; background: #000; min-height: 240px; display: flex; align-items: center; justify-content: center; border: 1px solid #334155; }
-  #video-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 40px; color: #475569; text-align: center; }
-  #video-placeholder i { font-size: 48px; color: #334155; }
-  #video-placeholder p { font-size: 13px; line-height: 1.6; color: #475569; }
-  video { width: 100%; display: block; max-height: 320px; object-fit: cover; }
-  canvas { display: none; }
-
-  /* CORNERS */
-  .corner { position: absolute; width: 24px; height: 24px; border-color: #14b8a6; border-style: solid; }
-  .corner.tl { top: 10px; left: 10px; border-width: 3px 0 0 3px; border-radius: 3px 0 0 0; }
-  .corner.tr { top: 10px; right: 10px; border-width: 3px 3px 0 0; border-radius: 0 3px 0 0; }
-  .corner.bl { bottom: 10px; left: 10px; border-width: 0 0 3px 3px; border-radius: 0 0 0 3px; }
-  .corner.br { bottom: 10px; right: 10px; border-width: 0 3px 3px 0; border-radius: 0 0 3px 0; }
-  .scan-line { position: absolute; left: 8%; right: 8%; height: 2px; background: rgba(20,184,166,0.85); box-shadow: 0 0 10px rgba(20,184,166,0.7); animation: scanMove 2s ease-in-out infinite; display: none; }
-  @keyframes scanMove { 0%,100%{top:12%} 50%{top:88%} }
-
-  /* FLASH */
-  #flash { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 8px; border-radius: 16px; }
-  #flash .flash-icon { font-size: 52px; }
-  #flash p { font-size: 16px; font-weight: 800; text-align: center; padding: 0 20px; }
-  #flash small { font-size: 12px; opacity: 0.85; }
-  @keyframes flashFade { 0%{opacity:1} 60%{opacity:1} 100%{opacity:0; pointer-events:none} }
+  #siswa-info{font-size:11px; color:var(--text-mute); text-align:center; padding:2px 0; font-weight:600;}
 
   /* CAMERA CONTROLS */
-  .cam-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+  .cam-controls{display:flex; gap:8px; flex-wrap:wrap;}
+  .cam-controls .field{flex:1; min-width:140px;}
+
+  /* VIDEO */
+  #video-wrap{position:relative; width:100%; border-radius:var(--r-lg); overflow:hidden; background:#000; min-height:230px; display:flex; align-items:center; justify-content:center; border:1px solid var(--border); transition:border-color .25s, box-shadow .25s;}
+  #video-wrap.active{border-color:var(--accent-dark); box-shadow:0 0 0 1px var(--accent-soft), 0 0 30px -6px rgba(45,212,191,.35);}
+  #video-placeholder{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:38px; color:#94a3b8; text-align:center;}
+  #video-placeholder i{font-size:42px; color:#3a4659;}
+  #video-placeholder p{font-size:12.5px; line-height:1.7; color:#94a3b8;}
+  video{width:100%; display:block; max-height:320px; object-fit:cover;}
+  canvas{display:none;}
+
+  .corner{position:absolute; width:22px; height:22px; border-color:var(--accent); border-style:solid;}
+  .corner.tl{top:10px; left:10px; border-width:3px 0 0 3px; border-radius:4px 0 0 0;}
+  .corner.tr{top:10px; right:10px; border-width:3px 3px 0 0; border-radius:0 4px 0 0;}
+  .corner.bl{bottom:10px; left:10px; border-width:0 0 3px 3px; border-radius:0 0 0 4px;}
+  .corner.br{bottom:10px; right:10px; border-width:0 3px 3px 0; border-radius:0 0 4px 0;}
+  .scan-line{position:absolute; left:8%; right:8%; height:2px; background:rgba(45,212,191,.9); box-shadow:0 0 12px rgba(45,212,191,.75); animation:scanMove 2s ease-in-out infinite; display:none;}
+  @keyframes scanMove{0%,100%{top:12%} 50%{top:88%}}
+
+  #flash{position:absolute; inset:0; display:none; align-items:center; justify-content:center; flex-direction:column; gap:8px; border-radius:var(--r-lg); color:#fff;}
+  #flash .flash-icon{font-size:48px;}
+  #flash p{font-size:15px; font-weight:800; text-align:center; padding:0 20px; color:#fff;}
+  #flash small{font-size:11.5px; opacity:.85; color:#fff;}
+  @keyframes flashFade{0%{opacity:1} 60%{opacity:1} 100%{opacity:0; pointer-events:none}}
 
   /* NO SUPPORT */
-  #no-support { display: none; width: 100%; background: #451a03; border: 1px solid #c2410c; border-radius: 12px; padding: 12px 16px; font-size: 12px; line-height: 1.7; color: #fdba74; }
-
-  /* LOG */
-  .log-header { padding: 10px 14px; background: #0f766e; display: flex; justify-content: space-between; align-items: center; }
-  .log-header span { font-size: 12px; font-weight: 700; }
-  .log-header-btns { display: flex; gap: 6px; }
-  #log-list { max-height: 200px; overflow-y: auto; }
-  #log-list::-webkit-scrollbar { width: 4px; }
-  #log-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-  .log-item { padding: 10px 14px; border-bottom: 1px solid #1e293b; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #0f172a; transition: background 0.2s; }
-  .log-item:hover { background: #1e293b; }
-  .log-nama { font-weight: 700; color: #e2e8f0; font-size: 12px; }
-  .log-meta { color: #475569; font-size: 10px; font-family: monospace; margin-top: 2px; }
-  .badge { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; white-space: nowrap; }
-  .badge-ok  { background: #0d9488; color: white; }
-  .badge-err { background: #dc2626; color: white; }
-  .badge-warn { background: #d97706; color: white; }
+  #no-support{display:none; width:100%; background:#fff7ed; border:1px solid #fcd9b4; border-radius:var(--r-md); padding:12px 16px; font-size:11.5px; line-height:1.7; color:#9a3412;}
 
   /* MANUAL INPUT */
-  #manual-wrap { display: flex; gap: 8px; }
-  #manual-input { flex: 1; padding: 11px 14px; border-radius: 10px; border: 1.5px solid #334155; background: #0f172a; color: white; font-size: 14px; font-family: monospace; outline: none; font-weight: 600; }
-  #manual-input:focus { border-color: #14b8a6; }
-  #manual-input::placeholder { color: #475569; font-weight: 400; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; }
+  .manual-row{display:flex; gap:8px;}
+  .input-icon-wrap{position:relative; flex:1; display:flex; align-items:center;}
+  .input-icon-wrap > i{position:absolute; left:12px; color:var(--text-mute); font-size:12.5px; pointer-events:none;}
+  #manual-input{padding-left:34px; border-radius:var(--r-sm); border:1.5px solid var(--border-soft); background:var(--surface-2); color:var(--text); font-size:13.5px; font-family:'Space Grotesk',monospace; outline:none; font-weight:600; width:100%; padding-top:11px; padding-bottom:11px; padding-right:12px; transition:border-color .15s, box-shadow .15s;}
+  #manual-input:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);}
+  #manual-input::placeholder{font-family:var(--font-b); font-weight:400; font-size:11.5px;}
+  .hint-text{font-size:10.5px; color:var(--text-mute); line-height:1.5;}
+
+  /* LOG SECTION */
+  .log-list{max-height:340px; overflow-y:auto;}
+  .log-empty{padding:28px 16px; text-align:center; color:var(--text-mute); font-size:11.5px;}
+  .log-empty i{font-size:22px; display:block; margin-bottom:8px; color:var(--border-soft);}
+  .log-item{display:flex; align-items:center; gap:10px; padding:10px 16px; border-bottom:1px solid var(--border); background:var(--surface-2); transition:background .15s;}
+  .log-item:last-child{border-bottom:none;}
+  .log-item:hover{background:var(--surface-soft);}
+  .log-avatar{width:32px; height:32px; border-radius:9px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-family:var(--font-d); font-weight:700; font-size:12.5px; color:#fff;}
+  .avatar-ok{background:linear-gradient(135deg, var(--accent-dark), var(--accent)); color:#fff;}
+  .avatar-warn{background:linear-gradient(135deg,#b45309, var(--warn)); color:#fff;}
+  .avatar-info{background:linear-gradient(135deg, var(--blue-dark), var(--blue)); color:#fff;}
+  .avatar-danger{background:linear-gradient(135deg,#7a1313, var(--danger)); color:#fff;}
+  .avatar-err{background:linear-gradient(135deg,#94a3b8,#cbd5e1); color:#334155;}
+  .log-info{flex:1; min-width:0;}
+  .log-nama{font-weight:700; color:var(--text); font-size:12.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .log-meta{color:var(--text-mute); font-size:10px; font-family:'Space Grotesk',monospace; margin-top:2px;}
+  .badge{padding:3px 10px; border-radius:20px; font-size:9.5px; font-weight:700; white-space:nowrap; flex-shrink:0;}
+  .badge-ok{background:var(--accent-dark); color:#d3fff6;}
+  .badge-err{background:var(--danger-dark); color:#fff;}
+  .badge-warn{background:var(--warn-dark); color:#fff7e0;}
+  .badge-info{background:var(--blue-dark); color:#e3f3ff;}
+  .badge-danger{background:#7a1313; color:#ffe2e2;}
+
+  .log-foot{padding:12px 16px; border-top:1px solid var(--border); background:var(--surface-2);}
 
   /* FOOTER */
-  .footer { font-size: 10px; color: #334155; text-align: center; padding-top: 8px; font-weight: 600; }
+  .footer{font-size:10px; color:var(--text-mute); text-align:center; padding-top:4px; font-weight:600;}
+
+  @media (max-width:520px){
+    .stats-row{gap:8px;}
+    .stat-chip{padding:10px;}
+  }
 </style>
 </head>
 <body>
 
 <!-- HEADER -->
 <div class="header">
-  <img src="https://i.imgur.com/tLNoNZy.png" alt="Logo SDN Sukamulya" onerror="this.style.display='none'">
-  <div class="header-text">
-    <h1>SD NEGERI SUKAMULYA</h1>
-    <p>Kec. Parongpong · Kab. Bandung Barat</p>
+  <div class="header-inner">
+    <img src="https://i.imgur.com/tLNoNZy.png" alt="Logo SDN Sukamulya" onerror="this.style.display='none'">
+    <div class="header-text">
+      <h1>SD NEGERI SUKAMULYA</h1>
+      <p>Kec. Parongpong · Kab. Bandung Barat</p>
+    </div>
+    <div class="header-badge"><span class="live-dot"></span> Scanner Absensi</div>
   </div>
-  <div class="header-badge"><i class="fas fa-qrcode"></i> Scanner Absensi</div>
 </div>
 
 <div class="content">
@@ -138,124 +253,154 @@
   <!-- NO SUPPORT -->
   <div id="no-support">
     <i class="fas fa-exclamation-triangle"></i> <strong>BarcodeDetector tidak didukung browser ini.</strong><br>
-    Gunakan <strong>Chrome / Edge versi terbaru</strong>. Sementara gunakan <strong>input manual NISN</strong> di bawah.
+    Gunakan <strong>Chrome / Edge versi terbaru</strong>. Sementara gunakan <strong>input manual NISN</strong> di sebelah kanan.
   </div>
 
-  <!-- KONFIGURASI -->
-  <div class="section">
-    <div class="section-header">
-      <i class="fas fa-cog"></i>
-      <span>Konfigurasi</span>
+  <!-- STAT CHIPS -->
+  <div class="stats-row">
+    <div class="stat-chip">
+      <span class="stat-num" id="stat-total">0</span>
+      <span class="stat-label">Total Siswa</span>
     </div>
-    <div class="section-body">
-      <div>
-        <label class="field-label">URL Web App GAS</label>
-        <input class="field" id="gas-url" type="url" placeholder="https://script.google.com/macros/s/.../exec">
-      </div>
-      <div class="row-2">
-        <div>
-          <label class="field-label">Tahun Pelajaran</label>
-          <input class="field" id="tahun-pelajaran" type="text" placeholder="2024/2025">
-        </div>
-        <div>
-          <label class="field-label">Kelas</label>
-          <input class="field" id="kelas-input" type="text" placeholder="6A">
-        </div>
-      </div>
-      <button class="btn btn-blue btn-full" onclick="loadSiswaFromGAS()">
-        <i class="fas fa-sync-alt"></i> Muat Data Siswa dari GAS
-      </button>
-      <div id="siswa-info">Belum ada data siswa dimuat</div>
+    <div class="stat-chip stat-chip-ok">
+      <span class="stat-num" id="stat-scanned">0</span>
+      <span class="stat-label">Sudah Absen</span>
+    </div>
+    <div class="stat-chip stat-chip-warn">
+      <span class="stat-num" id="stat-remaining">0</span>
+      <span class="stat-label">Belum Absen</span>
     </div>
   </div>
 
-  <!-- KAMERA -->
-  <div class="section">
-    <div class="section-header">
-      <i class="fas fa-camera"></i>
-      <span>Kamera Scanner</span>
-    </div>
-    <div class="section-body">
-      <div class="row-2">
-        <div>
-          <label class="field-label">Tanggal Absensi</label>
-          <input class="field" id="tgl-absensi" type="date">
+  <!-- GRID 2 KOLOM -->
+  <div class="grid-main">
+
+    <!-- ===== KOLOM KIRI: KONFIGURASI + KAMERA ===== -->
+    <div class="col-left">
+
+      <!-- KONFIGURASI -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-header-left"><span class="ico"><i class="fas fa-cog"></i></span><span>Konfigurasi</span></div>
         </div>
-        <div>
-          <label class="field-label">Status Default</label>
-          <select class="field" id="sel-status">
-            <option value="Hadir">✅ Hadir</option>
-            <option value="Sakit">🤒 Sakit</option>
-            <option value="Izin">📝 Izin</option>
-            <option value="Alpa">❌ Alpa</option>
-          </select>
+        <div class="section-body">
+          <div>
+            <label class="field-label">URL Web App GAS</label>
+            <input class="field" id="gas-url" type="url" placeholder="https://script.google.com/macros/s/.../exec">
+          </div>
+          <div class="row-2">
+            <div>
+              <label class="field-label">Tahun Pelajaran</label>
+              <input class="field" id="tahun-pelajaran" type="text" placeholder="2024/2025">
+            </div>
+            <div>
+              <label class="field-label">Kelas</label>
+              <input class="field" id="kelas-input" type="text" placeholder="6A">
+            </div>
+          </div>
+          <button class="btn btn-blue btn-full" onclick="loadSiswaFromGAS()">
+            <i class="fas fa-sync-alt"></i> Muat Data Siswa dari GAS
+          </button>
+          <div id="siswa-info">Belum ada data siswa dimuat</div>
         </div>
       </div>
-      <div class="cam-controls">
-        <select class="field" id="sel-facing" style="flex:1">
-          <option value="environment">📷 Kamera Belakang</option>
-          <option value="user">🤳 Kamera Depan</option>
-        </select>
-        <button class="btn btn-teal" id="btn-start" onclick="startCamera()">
-          <i class="fas fa-camera"></i> Buka Kamera
-        </button>
-        <button class="btn btn-red" id="btn-stop" onclick="stopCamera()" style="display:none">
-          <i class="fas fa-stop"></i> Stop
-        </button>
-      </div>
-    </div>
-  </div>
 
-  <!-- VIDEO -->
-  <div id="video-wrap">
-    <div id="video-placeholder">
-      <i class="fas fa-camera"></i>
-      <p>Isi konfigurasi & muat data siswa<br>lalu tekan <strong>"Buka Kamera"</strong><br>dan arahkan barcode kartu siswa</p>
-    </div>
-    <video id="video" autoplay muted playsinline style="display:none"></video>
-    <canvas id="canvas"></canvas>
-    <div class="corner tl"></div>
-    <div class="corner tr"></div>
-    <div class="corner bl"></div>
-    <div class="corner br"></div>
-    <div class="scan-line" id="scan-line"></div>
-    <div id="flash"></div>
-  </div>
+      <!-- KAMERA -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-header-left"><span class="ico"><i class="fas fa-camera"></i></span><span>Kamera Scanner</span></div>
+        </div>
+        <div class="section-body">
+          <div class="row-2">
+            <div>
+              <label class="field-label">Tanggal Absensi</label>
+              <input class="field" id="tgl-absensi" type="date">
+            </div>
+            <div>
+              <label class="field-label">Status Default</label>
+              <select class="field" id="sel-status">
+                <option value="Hadir">✅ Hadir</option>
+                <option value="Sakit">🤒 Sakit</option>
+                <option value="Izin">📝 Izin</option>
+                <option value="Alpa">❌ Alpa</option>
+              </select>
+            </div>
+          </div>
+          <div class="cam-controls">
+            <select class="field" id="sel-facing">
+              <option value="environment">📷 Kamera Belakang</option>
+              <option value="user">🤳 Kamera Depan</option>
+            </select>
+            <button class="btn btn-teal" id="btn-start" onclick="startCamera()">
+              <i class="fas fa-camera"></i> Buka Kamera
+            </button>
+            <button class="btn btn-red" id="btn-stop" onclick="stopCamera()" style="display:none">
+              <i class="fas fa-stop"></i> Stop
+            </button>
+          </div>
+        </div>
+      </div>
 
-  <!-- INPUT MANUAL -->
-  <div class="section">
-    <div class="section-header">
-      <i class="fas fa-keyboard"></i>
-      <span>Input Manual NISN</span>
-    </div>
-    <div class="section-body">
-      <div id="manual-wrap">
-        <input id="manual-input" type="text" placeholder="Ketik atau scan NISN lalu tekan Enter..." autocomplete="off" inputmode="numeric">
-        <button class="btn btn-teal" onclick="doManual()"><i class="fas fa-check"></i></button>
+      <!-- VIDEO -->
+      <div id="video-wrap">
+        <div id="video-placeholder">
+          <i class="fas fa-camera"></i>
+          <p>Isi konfigurasi & muat data siswa<br>lalu tekan <strong>"Buka Kamera"</strong><br>dan arahkan barcode kartu siswa</p>
+        </div>
+        <video id="video" autoplay muted playsinline style="display:none"></video>
+        <canvas id="canvas"></canvas>
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner bl"></div>
+        <div class="corner br"></div>
+        <div class="scan-line" id="scan-line"></div>
+        <div id="flash"></div>
       </div>
-    </div>
-  </div>
 
-  <!-- LOG -->
-  <div class="section">
-    <div class="log-header">
-      <span><i class="fas fa-list-check" style="margin-right:6px"></i><span id="log-title">Log Scan (0 siswa)</span></span>
-      <div class="log-header-btns">
-        <button class="btn btn-emerald btn-sm" onclick="kirimKeGAS()">
-          <i class="fas fa-save"></i> Simpan ke GAS
-        </button>
-        <button class="btn btn-slate btn-sm" onclick="clearLog()">
-          <i class="fas fa-trash"></i>
-        </button>
+    </div><!-- end col-left -->
+
+    <!-- ===== KOLOM KANAN: INPUT MANUAL + LOG ===== -->
+    <div class="col-right">
+
+      <!-- INPUT MANUAL -->
+      <div class="section input-section">
+        <div class="section-header">
+          <div class="section-header-left"><span class="ico"><i class="fas fa-keyboard"></i></span><span>Input Manual NISN</span></div>
+        </div>
+        <div class="section-body">
+          <div class="manual-row">
+            <div class="input-icon-wrap">
+              <i class="fas fa-id-card"></i>
+              <input id="manual-input" type="text" placeholder="Ketik / scan NISN lalu Enter" autocomplete="off" inputmode="numeric">
+            </div>
+            <button class="btn btn-teal" onclick="doManual()"><i class="fas fa-check"></i></button>
+          </div>
+          <p class="hint-text">Gunakan ini bila barcode sulit terbaca oleh kamera.</p>
+        </div>
       </div>
-    </div>
-    <div id="log-list">
-      <div data-placeholder style="padding:20px;text-align:center;color:#475569;font-size:12px;">
-        <i class="fas fa-qrcode" style="font-size:24px;display:block;margin-bottom:8px;color:#334155"></i>
-        Belum ada hasil scan
+
+      <!-- LOG -->
+      <div class="section log-section">
+        <div class="section-header">
+          <div class="section-header-left"><span class="ico"><i class="fas fa-list-check"></i></span><span id="log-title">Log Scan (0 siswa)</span></div>
+          <button class="icon-btn" onclick="clearLog()" title="Hapus semua log"><i class="fas fa-trash"></i></button>
+        </div>
+        <div id="log-list" class="log-list">
+          <div class="log-empty" data-placeholder>
+            <i class="fas fa-qrcode"></i>
+            Belum ada hasil scan
+          </div>
+        </div>
+        <div class="log-foot">
+          <button class="btn btn-emerald btn-full" onclick="kirimKeGAS()">
+            <i class="fas fa-cloud-upload-alt"></i> Simpan ke GAS
+          </button>
+        </div>
       </div>
-    </div>
-  </div>
+
+    </div><!-- end col-right -->
+
+  </div><!-- end grid-main -->
 
   <button class="btn btn-slate btn-full" onclick="window.close()">
     <i class="fas fa-times"></i> Tutup Scanner
@@ -302,9 +447,10 @@ try {
   var cached = localStorage.getItem('scanner_students_cache');
   if (cached) {
     students = JSON.parse(cached);
-    setSiswaInfo('📦 Cache: ' + students.length + ' siswa (klik Muat Ulang untuk refresh)', '#6ee7b7');
+    setSiswaInfo('📦 Cache: ' + students.length + ' siswa (klik Muat Ulang untuk refresh)', '#047857');
   }
 } catch(e) {}
+updateStats();
 
 // ===== LOAD DATA SISWA =====
 function loadSiswaFromGAS() {
@@ -315,14 +461,14 @@ function loadSiswaFromGAS() {
 
   localStorage.setItem('scanner_config', JSON.stringify({ gasUrl: gasUrl, kelas: kelas, tahun: tahun }));
   setStatus('⏳ Memuat data siswa...', 'warn');
-  setSiswaInfo('Memuat data...', '#fde68a');
+  setSiswaInfo('Memuat data...', '#b45309');
 
   var oldScript = document.getElementById('gas-jsonp');
   if (oldScript) oldScript.remove();
 
   window._loadTimeout = setTimeout(function() {
     setStatus('⏱ Timeout — pastikan GAS sudah di-deploy ulang', 'err');
-    setSiswaInfo('Timeout. Deploy ulang GAS lalu coba lagi.', '#fca5a5');
+    setSiswaInfo('Timeout. Deploy ulang GAS lalu coba lagi.', '#b91c1c');
   }, 15000);
 
   var url = gasUrl
@@ -336,7 +482,7 @@ function loadSiswaFromGAS() {
   script.onerror = function() {
     clearTimeout(window._loadTimeout);
     setStatus('❌ Script gagal dimuat — cek URL GAS', 'err');
-    setSiswaInfo('Gagal. Cek URL GAS.', '#fca5a5');
+    setSiswaInfo('Gagal. Cek URL GAS.', '#b91c1c');
   };
   document.body.appendChild(script);
 }
@@ -347,11 +493,12 @@ function onSiswaLoaded(data) {
     students = data.students;
     localStorage.setItem('scanner_students_cache', JSON.stringify(students));
     setStatus('✅ ' + students.length + ' siswa berhasil dimuat', 'ok');
-    setSiswaInfo('✅ ' + students.length + ' siswa siap di-scan', '#6ee7b7');
+    setSiswaInfo('✅ ' + students.length + ' siswa siap di-scan', '#047857');
   } else {
     setStatus('❌ Gagal: ' + (data ? data.message : 'Tidak ada respons'), 'err');
-    setSiswaInfo('Gagal memuat data siswa.', '#fca5a5');
+    setSiswaInfo('Gagal memuat data siswa.', '#b91c1c');
   }
+  updateStats();
 }
 
 // ===== KAMERA =====
@@ -382,6 +529,7 @@ async function startCamera() {
 
   document.getElementById('video-placeholder').style.display = 'none';
   video.style.display = 'block';
+  document.getElementById('video-wrap').classList.add('active');
   document.getElementById('btn-start').style.display = 'none';
   document.getElementById('btn-stop').style.display  = '';
   document.getElementById('scan-line').style.display = '';
@@ -402,6 +550,7 @@ function stopCamera() {
   video.srcObject = null;
   video.style.display = 'none';
   document.getElementById('video-placeholder').style.display = 'flex';
+  document.getElementById('video-wrap').classList.remove('active');
   document.getElementById('btn-start').style.display = '';
   document.getElementById('btn-stop').style.display  = 'none';
   document.getElementById('scan-line').style.display = 'none';
@@ -512,12 +661,12 @@ function setStatus(msg, cls) {
 function setSiswaInfo(msg, color) {
   var el = document.getElementById('siswa-info');
   el.textContent = msg;
-  el.style.color = color || '#64748b';
+  el.style.color = color || 'var(--text-mute)';
 }
 
 function showFlash(ok, msg, sub) {
   var el = document.getElementById('flash');
-  el.style.background = ok ? 'rgba(5,150,105,0.9)' : 'rgba(220,38,38,0.9)';
+  el.style.background = ok ? 'rgba(5,150,105,0.92)' : 'rgba(220,38,38,0.92)';
   el.innerHTML = '<div class="flash-icon">' + (ok ? '✅' : '❌') + '</div>'
     + '<p>' + msg + '</p>'
     + (sub ? '<small>' + sub + '</small>' : '');
@@ -528,25 +677,58 @@ function showFlash(ok, msg, sub) {
   setTimeout(function(){ el.style.display = 'none'; }, 1300);
 }
 
+function avatarClass(status, isErr) {
+  if (isErr) return 'avatar-err';
+  if (status === 'Hadir') return 'avatar-ok';
+  if (status === 'Sakit') return 'avatar-warn';
+  if (status === 'Izin')  return 'avatar-info';
+  return 'avatar-danger';
+}
+
+function badgeClass(status, isErr) {
+  if (isErr) return 'badge-err';
+  if (status === 'Hadir') return 'badge-ok';
+  if (status === 'Sakit') return 'badge-warn';
+  if (status === 'Izin')  return 'badge-info';
+  if (status === 'Alpa')  return 'badge-danger';
+  return 'badge-ok';
+}
+
 function addLog(entry, isErr) {
   var list = document.getElementById('log-list');
   if (list.querySelector('[data-placeholder]')) list.innerHTML = '';
-  var badgeClass = isErr ? 'badge-err' : 'badge-ok';
+
+  var initial = (entry.Nama && entry.Nama !== '(Tidak ditemukan)') ? entry.Nama.trim().charAt(0).toUpperCase() : '?';
+  var aCls = avatarClass(entry.Status, isErr);
+  var bCls = badgeClass(entry.Status, isErr);
+
   var item = document.createElement('div');
   item.className = 'log-item';
-  item.innerHTML = '<div>'
+  item.innerHTML = '<div class="log-avatar ' + aCls + '">' + initial + '</div>'
+    + '<div class="log-info">'
     + '<div class="log-nama">' + entry.Nama + '</div>'
     + '<div class="log-meta">' + entry.NISN + ' · ' + entry.Kelas + ' · ' + entry.waktu + '</div>'
     + '</div>'
-    + '<span class="badge ' + badgeClass + '">' + entry.Status + '</span>';
+    + '<span class="badge ' + bCls + '">' + entry.Status + '</span>';
   list.insertBefore(item, list.firstChild);
   document.getElementById('log-title').textContent = 'Log Scan (' + scanLog.length + ' siswa)';
+  updateStats();
 }
 
 function clearLog() {
   scanLog = []; scanned = {};
-  document.getElementById('log-list').innerHTML = '<div data-placeholder style="padding:20px;text-align:center;color:#475569;font-size:12px;"><i class="fas fa-qrcode" style="font-size:24px;display:block;margin-bottom:8px;color:#334155"></i>Belum ada hasil scan</div>';
+  document.getElementById('log-list').innerHTML = '<div class="log-empty" data-placeholder><i class="fas fa-qrcode"></i>Belum ada hasil scan</div>';
   document.getElementById('log-title').textContent = 'Log Scan (0 siswa)';
+  updateStats();
+}
+
+function updateStats() {
+  var total     = students.length;
+  var scannedN  = Object.keys(scanned).length;
+  var remaining = Math.max(total - scannedN, 0);
+  document.getElementById('stat-total').textContent     = total;
+  document.getElementById('stat-scanned').textContent    = scannedN;
+  document.getElementById('stat-remaining').textContent  = remaining;
 }
 </script>
 </body>
