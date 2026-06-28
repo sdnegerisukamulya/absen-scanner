@@ -302,6 +302,9 @@
             <i class="fas fa-sync-alt"></i> Muat Data Siswa dari GAS
           </button>
           <div id="siswa-info">Belum ada data siswa dimuat</div>
+          <button class="btn btn-slate btn-sm btn-full" onclick="resetConfig()">
+            <i class="fas fa-undo"></i> Reset Konfigurasi
+          </button>
         </div>
       </div>
 
@@ -440,6 +443,14 @@ if (urlParams.get('tahun'))   document.getElementById('tahun-pelajaran').value =
 // Load cache
 try {
   var cfg = JSON.parse(localStorage.getItem('scanner_config') || '{}');
+
+  // Kalau URL default di kode sudah ganti (deploy ulang), paksa pakai default baru
+  if (cfg.gasUrl && cfg.gasUrl !== DEFAULT_GAS_URL && !urlParams.get('gas_url')) {
+    cfg.gasUrl = DEFAULT_GAS_URL;
+    localStorage.setItem('scanner_config', JSON.stringify(cfg));
+    localStorage.removeItem('scanner_students_cache'); // cache siswa juga ikut direset
+  }
+
   if (cfg.gasUrl && !document.getElementById('gas-url').value) document.getElementById('gas-url').value = cfg.gasUrl;
   if (cfg.kelas  && !document.getElementById('kelas-input').value) document.getElementById('kelas-input').value = cfg.kelas;
   if (cfg.tahun  && !document.getElementById('tahun-pelajaran').value) document.getElementById('tahun-pelajaran').value = cfg.tahun;
@@ -453,7 +464,7 @@ try {
 updateStats();
 
 // ===== LOAD DATA SISWA =====
-function loadSiswaFromGAS() {
+async function loadSiswaFromGAS() {
   var gasUrl = document.getElementById('gas-url').value.trim();
   var kelas  = document.getElementById('kelas-input').value.trim();
   var tahun  = document.getElementById('tahun-pelajaran').value.trim();
@@ -463,28 +474,51 @@ function loadSiswaFromGAS() {
   setStatus('⏳ Memuat data siswa...', 'warn');
   setSiswaInfo('Memuat data...', '#b45309');
 
+  var qs = '?action=getSiswaScanner'
+    + (kelas ? '&kelas=' + encodeURIComponent(kelas) : '')
+    + (tahun ? '&tahun=' + encodeURIComponent(tahun) : '');
+
+  // Coba fetch() dulu — lebih jarang diblokir ad-blocker/extension
+  try {
+    var res = await fetch(gasUrl + qs, { method: 'GET' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var data = await res.json();
+    onSiswaLoaded(data);
+    return;
+  } catch (e) {
+    console.warn('fetch gagal, coba JSONP fallback:', e);
+  }
+
+  // Fallback ke JSONP kalau fetch gagal
+  loadSiswaViaJSONP(gasUrl, qs);
+}
+
+function loadSiswaViaJSONP(gasUrl, qs) {
   var oldScript = document.getElementById('gas-jsonp');
   if (oldScript) oldScript.remove();
 
   window._loadTimeout = setTimeout(function() {
-    setStatus('⏱ Timeout — pastikan GAS sudah di-deploy ulang', 'err');
-    setSiswaInfo('Timeout. Deploy ulang GAS lalu coba lagi.', '#b91c1c');
+    setStatus('⏱ Timeout — coba Reset Konfigurasi atau matikan ad-blocker', 'err');
+    setSiswaInfo('Timeout. Coba Reset Konfigurasi.', '#b91c1c');
   }, 15000);
-
-  var url = gasUrl
-    + '?action=getSiswaScanner&callback=onSiswaLoaded'
-    + (kelas ? '&kelas=' + encodeURIComponent(kelas) : '')
-    + (tahun ? '&tahun=' + encodeURIComponent(tahun) : '');
 
   var script = document.createElement('script');
   script.id  = 'gas-jsonp';
-  script.src = url;
+  script.src = gasUrl + qs + '&callback=onSiswaLoaded';
   script.onerror = function() {
     clearTimeout(window._loadTimeout);
-    setStatus('❌ Script gagal dimuat — cek URL GAS', 'err');
-    setSiswaInfo('Gagal. Cek URL GAS.', '#b91c1c');
+    setStatus('❌ Gagal dimuat — coba Reset Konfigurasi / browser lain / matikan ad-blocker', 'err');
+    setSiswaInfo('Gagal. Coba Reset Konfigurasi di bawah.', '#b91c1c');
   };
   document.body.appendChild(script);
+}
+
+function resetConfig() {
+  if (confirm('Reset URL GAS & cache data siswa ke default?')) {
+    localStorage.removeItem('scanner_config');
+    localStorage.removeItem('scanner_students_cache');
+    location.reload();
+  }
 }
 
 function onSiswaLoaded(data) {
