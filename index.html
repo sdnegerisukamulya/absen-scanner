@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scanner Absensi</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #0f172a; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 16px; gap: 10px; }
+  h2 { font-size: 16px; color: #14b8a6; margin-top: 4px; text-align: center; }
+  p.sub { font-size: 11px; color: #64748b; text-align: center; }
+  #status-bar { width: 100%; max-width: 500px; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: 700; text-align: center; background: #1e293b; color: #94a3b8; }
+  #status-bar.ok  { background: #065f46; color: #6ee7b7; }
+  #status-bar.err { background: #7f1d1d; color: #fca5a5; }
+  #status-bar.warn { background: #78350f; color: #fde68a; }
+  .controls { width: 100%; max-width: 500px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { padding: 9px 16px; border: none; border-radius: 9px; font-weight: 700; cursor: pointer; font-size: 13px; color: white; flex-shrink: 0; }
+  .btn-green  { background: #0d9488; }
+  .btn-red    { background: #dc2626; }
+  .btn-slate  { background: #475569; }
+  .btn-purple { background: #7c3aed; }
+  .btn-blue   { background: #2563eb; }
+  select.styled { padding: 8px 10px; border-radius: 8px; border: 2px solid #334155; background: #1e293b; color: white; font-size: 12px; font-weight: 700; outline: none; flex: 1; min-width: 120px; }
+  input.styled { padding: 8px 10px; border-radius: 8px; border: 2px solid #334155; background: #1e293b; color: white; font-size: 12px; font-weight: 700; outline: none; flex: 1; }
+  input.styled:focus { border-color: #14b8a6; }
+  #video-wrap { position: relative; width: 100%; max-width: 500px; border-radius: 14px; overflow: hidden; background: #000; min-height: 240px; display: flex; align-items: center; justify-content: center; }
+  #video-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 40px; color: #475569; text-align: center; }
+  #video-placeholder span { font-size: 48px; }
+  #video-placeholder p { font-size: 13px; line-height: 1.6; }
+  video { width: 100%; display: block; max-height: 320px; object-fit: cover; }
+  canvas { display: none; }
+  .corner { position: absolute; width: 22px; height: 22px; border-color: #14b8a6; border-style: solid; }
+  .corner.tl { top: 10px; left: 10px; border-width: 3px 0 0 3px; border-radius: 3px 0 0 0; }
+  .corner.tr { top: 10px; right: 10px; border-width: 3px 3px 0 0; border-radius: 0 3px 0 0; }
+  .corner.bl { bottom: 10px; left: 10px; border-width: 0 0 3px 3px; border-radius: 0 0 0 3px; }
+  .corner.br { bottom: 10px; right: 10px; border-width: 0 3px 3px 0; border-radius: 0 0 3px 0; }
+  .scan-line { position: absolute; left: 8%; right: 8%; height: 2px; background: rgba(20,184,166,0.85); box-shadow: 0 0 8px rgba(20,184,166,0.7); animation: scanMove 2s ease-in-out infinite; display: none; }
+  @keyframes scanMove { 0%,100%{top:12%} 50%{top:88%} }
+  #flash { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 8px; }
+  #flash p { font-size: 16px; font-weight: 700; text-align: center; padding: 0 20px; }
+  @keyframes flashFade { 0%{opacity:1} 60%{opacity:1} 100%{opacity:0; pointer-events:none} }
+  #manual-wrap { width: 100%; max-width: 500px; display: flex; gap: 8px; }
+  #manual-input { flex: 1; padding: 10px 14px; border-radius: 10px; border: 2px solid #334155; background: #1e293b; color: white; font-size: 14px; font-family: monospace; outline: none; }
+  #manual-input:focus { border-color: #14b8a6; }
+  #log-box { width: 100%; max-width: 500px; background: #1e293b; border-radius: 12px; overflow: hidden; }
+  .log-head { padding: 9px 14px; background: #0f766e; font-size: 12px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+  .log-head button { background: none; border: none; color: #a7f3d0; cursor: pointer; font-size: 11px; }
+  #log-list { max-height: 180px; overflow-y: auto; }
+  .log-item { padding: 8px 14px; border-bottom: 1px solid #334155; font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .log-nama { font-weight: 700; color: #e2e8f0; font-size: 12px; }
+  .log-meta { color: #64748b; font-size: 10px; font-family: monospace; }
+  .badge { padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+  .badge-ok  { background: #0d9488; color: white; }
+  .badge-err { background: #dc2626; color: white; }
+  #config-box { width: 100%; max-width: 500px; background: #1e293b; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+  #config-box label { font-size: 11px; color: #94a3b8; font-weight: 700; }
+  #no-support { display: none; width: 100%; max-width: 500px; background: #7c2d12; border: 1px solid #c2410c; border-radius: 10px; padding: 12px 16px; font-size: 12px; line-height: 1.7; color: #fdba74; }
+  .section-title { width: 100%; max-width: 500px; font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 1px; padding-top: 4px; }
+</style>
+</head>
+<body>
+
+<h2>📷 Scanner Absensi — Standalone</h2>
+<p class="sub">Host di GitHub Pages · Bebas dari pembatasan iframe GAS</p>
+
+<div id="status-bar">Siap — isi URL GAS lalu tekan Buka Kamera</div>
+
+<!-- Konfigurasi -->
+<div class="section-title">⚙️ Konfigurasi</div>
+<div id="config-box">
+  <label>URL Web App GAS (wajib diisi)</label>
+  <input class="styled" id="gas-url" type="url" placeholder="https://script.google.com/macros/s/XXXXX/exec" value="">
+  
+  <label>Tanggal Absensi</label>
+  <input class="styled" id="tgl-absensi" type="date">
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
+      <label>Tahun Pelajaran</label>
+      <input class="styled" id="tahun-pelajaran" type="text" placeholder="2024/2025">
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
+      <label>Kelas</label>
+      <input class="styled" id="kelas-input" type="text" placeholder="6A">
+    </div>
+  </div>
+
+  <button class="btn btn-blue" style="width:100%" onclick="loadSiswaFromGAS()">🔄 Muat Data Siswa dari GAS</button>
+  <div id="siswa-info" style="font-size:11px;color:#64748b;text-align:center;">Belum ada data siswa dimuat</div>
+</div>
+
+<!-- Kontrol Kamera -->
+<div class="section-title">📷 Kamera</div>
+<div class="controls">
+  <button class="btn btn-green" id="btn-start" onclick="startCamera()">📷 Buka Kamera</button>
+  <button class="btn btn-red"   id="btn-stop"  onclick="stopCamera()" style="display:none">⏹ Stop</button>
+  <select class="styled" id="sel-facing">
+    <option value="environment">Kamera Belakang</option>
+    <option value="user">Kamera Depan</option>
+  </select>
+  <select class="styled" id="sel-status">
+    <option value="Hadir">✅ Hadir</option>
+    <option value="Sakit">🤒 Sakit</option>
+    <option value="Izin">📝 Izin</option>
+    <option value="Alpa">❌ Alpa</option>
+  </select>
+</div>
+
+<div id="no-support">
+  ⚠️ <strong>Browser Anda tidak mendukung BarcodeDetector API.</strong><br>
+  Gunakan <strong>Chrome / Edge versi terbaru</strong> di Android atau Desktop.<br>
+  Sementara gunakan <strong>input manual NISN</strong> di bawah.
+</div>
+
+<div id="video-wrap">
+  <div id="video-placeholder">
+    <span>📷</span>
+    <p>Isi konfigurasi di atas<br>lalu tekan <strong>"Buka Kamera"</strong></p>
+  </div>
+  <video id="video" autoplay muted playsinline style="display:none"></video>
+  <canvas id="canvas"></canvas>
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+  <div class="scan-line" id="scan-line"></div>
+  <div id="flash"></div>
+</div>
+
+<!-- Input Manual -->
+<div class="section-title">⌨️ Input Manual</div>
+<div id="manual-wrap">
+  <input id="manual-input" type="text" placeholder="Ketik NISN lalu tekan Enter..." autocomplete="off" inputmode="numeric">
+  <button class="btn btn-green" onclick="doManual()">Cek</button>
+</div>
+
+<!-- Log -->
+<div id="log-box">
+  <div class="log-head">
+    <span id="log-title">Log Scan (0 siswa)</span>
+    <div style="display:flex;gap:8px;">
+      <button onclick="kirimKeGAS()" style="background:#0d9488;padding:3px 10px;border-radius:6px;color:white;border:none;cursor:pointer;font-weight:700;font-size:11px;">💾 Simpan ke GAS</button>
+      <button onclick="clearLog()">🗑 Bersihkan</button>
+    </div>
+  </div>
+  <div id="log-list"><div style="padding:20px;text-align:center;color:#475569;font-size:12px;">Belum ada hasil scan</div></div>
+</div>
+
+<button class="btn btn-slate" style="width:100%;max-width:500px;" onclick="window.close()">✕ Tutup</button>
+
+<script>
+// ===== STATE =====
+var mediaStream   = null;
+var rafId         = null;
+var scanned       = {};
+var scanLog       = [];
+var onCooldown    = false;
+var students      = [];
+var detector      = null;
+var hasBarcodeAPI = ('BarcodeDetector' in window);
+
+// ===== INIT =====
+if (!hasBarcodeAPI) {
+  document.getElementById('no-support').style.display = 'block';
+}
+
+// Set tanggal default hari ini
+var today = new Date();
+var yyyy = today.getFullYear();
+var mm = String(today.getMonth()+1).padStart(2,'0');
+var dd = String(today.getDate()).padStart(2,'0');
+document.getElementById('tgl-absensi').value = yyyy+'-'+mm+'-'+dd;
+
+// Baca config dari URL parameter (opsional)
+var urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('gas_url')) document.getElementById('gas-url').value = decodeURIComponent(urlParams.get('gas_url'));
+if (urlParams.get('kelas'))   document.getElementById('kelas-input').value = urlParams.get('kelas');
+if (urlParams.get('tahun'))   document.getElementById('tahun-pelajaran').value = decodeURIComponent(urlParams.get('tahun'));
+
+// Coba load siswa dari localStorage (cache sebelumnya)
+try {
+  var cached = localStorage.getItem('scanner_students_cache');
+  if (cached) {
+    students = JSON.parse(cached);
+    document.getElementById('siswa-info').textContent = '📦 Cache: ' + students.length + ' siswa (klik Muat ulang untuk refresh)';
+    document.getElementById('siswa-info').style.color = '#6ee7b7';
+  }
+} catch(e) {}
+
+// ===== LOAD DATA SISWA DARI GAS =====
+async function loadSiswaFromGAS() {
+  var gasUrl   = document.getElementById('gas-url').value.trim();
+  var kelas    = document.getElementById('kelas-input').value.trim();
+  var tahun    = document.getElementById('tahun-pelajaran').value.trim();
+
+  if (!gasUrl) { alert('Isi URL GAS terlebih dahulu!'); return; }
+
+  setStatus('⏳ Memuat data siswa dari GAS...', 'warn');
+  document.getElementById('siswa-info').textContent = 'Memuat...';
+
+  // GAS tidak support CORS POST langsung, kita gunakan endpoint GET dengan parameter
+  // Kita perlu tambahkan endpoint khusus di GAS untuk ini
+  // Untuk sekarang, gunakan jsonp trick via script tag
+  try {
+    var url = gasUrl + (gasUrl.includes('?') ? '&' : '?') 
+            + 'action=getSiswaScanner'
+            + (kelas ? '&kelas=' + encodeURIComponent(kelas) : '')
+            + (tahun ? '&tahun=' + encodeURIComponent(tahun) : '')
+            + '&callback=onSiswaLoaded';
+
+    // Hapus script lama kalau ada
+    var oldScript = document.getElementById('gas-jsonp');
+    if (oldScript) oldScript.remove();
+
+    var script = document.createElement('script');
+    script.id  = 'gas-jsonp';
+    script.src = url;
+    script.onerror = function() {
+      setStatus('❌ Gagal memuat — cek URL GAS dan koneksi internet', 'err');
+      document.getElementById('siswa-info').textContent = 'Gagal memuat data';
+    };
+    document.body.appendChild(script);
+
+    // Timeout 15 detik
+    setTimeout(function() {
+      if (students.length === 0) {
+        setStatus('⏱ Timeout — cek URL GAS', 'err');
+        document.getElementById('siswa-info').textContent = 'Timeout. Cek URL GAS.';
+      }
+    }, 15000);
+
+  } catch(e) {
+    setStatus('❌ Error: ' + e.message, 'err');
+  }
+}
+
+// Callback dari JSONP
+function onSiswaLoaded(data) {
+  if (data && data.success && data.students) {
+    students = data.students;
+    localStorage.setItem('scanner_students_cache', JSON.stringify(students));
+    setStatus('✅ ' + students.length + ' siswa berhasil dimuat', 'ok');
+    document.getElementById('siswa-info').textContent = '✅ ' + students.length + ' siswa siap di-scan';
+    document.getElementById('siswa-info').style.color = '#6ee7b7';
+  } else {
+    setStatus('❌ Gagal: ' + (data ? data.message : 'Tidak ada respons'), 'err');
+    document.getElementById('siswa-info').textContent = 'Gagal memuat data';
+    document.getElementById('siswa-info').style.color = '#fca5a5';
+  }
+}
+
+// ===== KAMERA =====
+async function startCamera() {
+  if (mediaStream) { mediaStream.getTracks().forEach(function(t){ t.stop(); }); mediaStream = null; }
+
+  var facing = document.getElementById('sel-facing').value;
+  var constraints = [
+    { video: { facingMode: { ideal: facing }, width: { ideal: 1280 } } },
+    { video: { facingMode: facing } },
+    { video: true }
+  ];
+
+  var opened = false;
+  for (var i = 0; i < constraints.length; i++) {
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia(constraints[i]);
+      opened = true;
+      break;
+    } catch(e) {
+      if (i === constraints.length - 1) {
+        setStatus('❌ Kamera gagal: ' + e.name + ' — ' + e.message, 'err');
+        return;
+      }
+    }
+  }
+  if (!opened) return;
+
+  var video = document.getElementById('video');
+  video.srcObject = mediaStream;
+  await video.play();
+
+  document.getElementById('video-placeholder').style.display = 'none';
+  video.style.display = 'block';
+  document.getElementById('btn-start').style.display = 'none';
+  document.getElementById('btn-stop').style.display  = '';
+  document.getElementById('scan-line').style.display = '';
+  setStatus('🟢 Kamera aktif — arahkan barcode ke tengah layar', 'ok');
+
+  if (hasBarcodeAPI) {
+    detector = new BarcodeDetector({ formats: ['code_128','ean_13','ean_8','qr_code','code_39','upc_a','upc_e'] });
+    rafId = requestAnimationFrame(scanLoop);
+  } else {
+    setStatus('⚠️ Kamera aktif tapi BarcodeDetector tidak didukung — gunakan input manual', 'warn');
+  }
+}
+
+function stopCamera() {
+  if (mediaStream) { mediaStream.getTracks().forEach(function(t){ t.stop(); }); mediaStream = null; }
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  var video = document.getElementById('video');
+  video.srcObject = null;
+  video.style.display = 'none';
+  document.getElementById('video-placeholder').style.display = 'flex';
+  document.getElementById('btn-start').style.display = '';
+  document.getElementById('btn-stop').style.display  = 'none';
+  document.getElementById('scan-line').style.display = 'none';
+  setStatus('⏸ Kamera dimatikan', '');
+}
+
+// ===== SCAN LOOP =====
+function scanLoop() {
+  if (!mediaStream || !detector) return;
+  var video  = document.getElementById('video');
+  var canvas = document.getElementById('canvas');
+  if (video.readyState < 2) { rafId = requestAnimationFrame(scanLoop); return; }
+  canvas.width  = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  detector.detect(canvas)
+    .then(function(codes) {
+      if (codes.length > 0) processResult(codes[0].rawValue);
+      rafId = requestAnimationFrame(scanLoop);
+    })
+    .catch(function() { rafId = requestAnimationFrame(scanLoop); });
+}
+
+// ===== PROSES HASIL SCAN =====
+function processResult(raw) {
+  if (!raw || onCooldown) return;
+  var nisn = String(raw).replace(/\D/g,'').padStart(10,'0');
+  if (nisn.length < 5) return;
+
+  if (scanned[nisn]) { showFlash(false, '⚠️ Sudah absen!', ''); return; }
+
+  onCooldown = true;
+  setTimeout(function(){ onCooldown = false; }, 2000);
+
+  var student = null;
+  if (students.length > 0) {
+    student = students.find(function(s){
+      return String(s.NISN).replace(/\D/g,'').padStart(10,'0') === nisn;
+    });
+  }
+
+  var nama   = student ? student.Nama  : '(NISN: ' + nisn + ')';
+  var kelas  = student ? student.Kelas : '-';
+  var tahun  = student ? student.Tahun_Pelajaran : document.getElementById('tahun-pelajaran').value;
+  var isErr  = !student;
+
+  if (!student) { showFlash(false, '⚠️ NISN tidak ada di daftar', nisn); }
+  else          { scanned[nisn] = true; showFlash(true, '✅ ' + nama, kelas); }
+
+  var status = document.getElementById('sel-status').value;
+  var waktu  = new Date().toLocaleTimeString('id-ID');
+  var entry  = { NISN: nisn, Nama: nama, Kelas: kelas, Tahun_Pelajaran: tahun, Status: status, waktu: waktu };
+  scanLog.push(entry);
+  addLog(nisn, nama, status, isErr);
+}
+
+function doManual() {
+  var val = document.getElementById('manual-input').value.trim();
+  if (val) { processResult(val); document.getElementById('manual-input').value = ''; }
+}
+document.getElementById('manual-input').addEventListener('keyup', function(e){ if(e.key==='Enter') doManual(); });
+
+// ===== KIRIM LOG KE GAS =====
+async function kirimKeGAS() {
+  if (scanLog.length === 0) { alert('Belum ada data scan!'); return; }
+
+  var gasUrl = document.getElementById('gas-url').value.trim();
+  var tgl    = document.getElementById('tgl-absensi').value;
+  if (!gasUrl) { alert('Isi URL GAS terlebih dahulu!'); return; }
+  if (!tgl)    { alert('Isi tanggal absensi!'); return; }
+
+  // Tambahkan tanggal ke setiap entry
+  var payload = scanLog.map(function(e) {
+    return { NISN: e.NISN, Nama: e.Nama, Kelas: e.Kelas, Tahun_Pelajaran: e.Tahun_Pelajaran, Tanggal: tgl, Status: e.Status };
+  });
+
+  setStatus('⏳ Mengirim ' + payload.length + ' data ke GAS...', 'warn');
+
+  try {
+    var res = await fetch(gasUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'saveAbsensiScanner', data: payload })
+    });
+    var json = await res.json();
+    if (json && json.success) {
+      setStatus('✅ ' + payload.length + ' data absensi tersimpan!', 'ok');
+      alert('✅ Berhasil! ' + payload.length + ' data absensi tersimpan ke GAS.');
+      clearLog();
+    } else {
+      setStatus('❌ Gagal simpan: ' + (json ? json.message : 'Error'), 'err');
+      alert('❌ Gagal: ' + (json ? json.message : 'Tidak ada respons'));
+    }
+  } catch(e) {
+    // GAS tidak support CORS untuk POST biasa, gunakan no-cors
+    // Fallback: buka GAS URL dengan data di parameter
+    setStatus('⚠️ Mencoba metode alternatif...', 'warn');
+    
+    var dataStr = encodeURIComponent(JSON.stringify(payload));
+    var tglStr  = encodeURIComponent(tgl);
+    var fallbackUrl = gasUrl + '?action=saveAbsensiScanner&tgl=' + tglStr + '&data=' + dataStr;
+    
+    // Buka di tab baru sebagai fallback
+    var win = window.open(fallbackUrl, '_blank');
+    if (win) {
+      setStatus('📤 Data dikirim via tab baru — tutup tab itu setelah selesai', 'warn');
+    } else {
+      alert('❌ Popup diblokir. Salin log manual atau izinkan popup.');
+    }
+  }
+}
+
+// ===== UI HELPERS =====
+function setStatus(msg, cls) {
+  var el = document.getElementById('status-bar');
+  el.textContent = msg;
+  el.className   = cls || '';
+}
+
+function showFlash(ok, msg, sub) {
+  var el = document.getElementById('flash');
+  el.style.background = ok ? 'rgba(16,185,129,0.85)' : 'rgba(239,68,68,0.85)';
+  el.innerHTML = '<p style="font-size:18px">' + msg + '</p>' + (sub ? '<p style="font-size:12px;opacity:0.85">' + sub + '</p>' : '');
+  el.style.display = 'flex';
+  el.style.animation = 'none';
+  void el.offsetWidth;
+  el.style.animation = 'flashFade 1.2s forwards';
+  setTimeout(function(){ el.style.display = 'none'; }, 1200);
+}
+
+function addLog(nisn, nama, status, isErr) {
+  var list = document.getElementById('log-list');
+  if (list.querySelector('[data-placeholder]')) list.innerHTML = '';
+  var item = document.createElement('div');
+  item.className = 'log-item';
+  item.innerHTML = '<div><div class="log-nama">' + nama + '</div>'
+    + '<div class="log-meta">' + nisn + ' · ' + new Date().toLocaleTimeString('id-ID') + '</div></div>'
+    + '<span class="badge ' + (isErr ? 'badge-err' : 'badge-ok') + '">' + status + '</span>';
+  list.insertBefore(item, list.firstChild);
+  document.getElementById('log-title').textContent = 'Log Scan (' + scanLog.length + ' siswa)';
+}
+
+function clearLog() {
+  scanLog = []; scanned = {};
+  document.getElementById('log-list').innerHTML = '<div data-placeholder style="padding:20px;text-align:center;color:#475569;font-size:12px;">Belum ada hasil scan</div>';
+  document.getElementById('log-title').textContent = 'Log Scan (0 siswa)';
+}
+</script>
+</body>
+</html>
